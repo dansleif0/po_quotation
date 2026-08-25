@@ -10,6 +10,9 @@ class Offer extends Model
     use HasFactory;
 
     protected $fillable = [
+        'no_surat',
+        'project_no',
+        'client_id',
         'nama_klien',
         'client_details',
         'perihal',
@@ -19,10 +22,9 @@ class Offer extends Model
         'harga_per_m2',
         'jasa_nama',
         'jasa_harga',
-        'volume',       // TAMBAHAN BARU
-        'satuan',       // TAMBAHAN BARU
-        'harga_satuan', // TAMBAHAN BARU
-        'harga_jasa',   // Ini untuk TOTAL HARGA (Volume x Harga Satuan)
+        'satuan',
+        'harga_satuan',
+        'harga_jasa',
         'diskon_global',
         'pisah_kriteria_total',
         'hilangkan_grand_total',
@@ -31,12 +33,18 @@ class Offer extends Model
         'total_keseluruhan',
     ];
 
-    public function items()
-{
-    return $this->hasMany(OfferItem::class);
-}
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 
-public function jasaItems() {
-    return $this->hasMany(OfferJasa::class);
-}
+    public function items()
+    {
+        return $this->hasMany(OfferItem::class);
+    }
+
+    public function jasaItems()
+    {
+        return $this->hasMany(OfferJasa::class);
+    }
 }

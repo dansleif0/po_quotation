@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Offer;
+use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -17,6 +18,8 @@ class OfferController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama_klien', 'like', '%' . $search . '%')
+                    ->orWhere('no_surat', 'like', '%' . $search . '%')
+                    ->orWhere('project_no', 'like', '%' . $search . '%')
                     ->orWhere('id', $search);
             });
         }
@@ -25,86 +28,91 @@ class OfferController extends Controller
         return view('histori.index', compact('offers', 'search'));
     }
 
-    public function create_combined()
+    public function create()
     {
-        $offer = new Offer();
-        $products = Product::all();
-        return view('penawaran.create-combine', compact('offer', 'products'));
+        $clients = Client::orderBy('nama_klien', 'asc')->get();
+        $products = Product::orderBy('nama_produk', 'asc')->get();
+
+        // Generate No. Surat Otomatis: QUO/YYYY/MM/XXXX
+        $countToday = Offer::whereYear('created_at', date('Y'))
+            ->whereMonth('created_at', date('m'))
+            ->count() + 1;
+
+        $noSurat = 'QUO/' . date('Y/m/') . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+
+        return view('penawaran.create', compact('clients', 'products', 'noSurat'));
     }
 
-    public function store_combined(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
-            'nama_klien' => 'required|string|max:255',
-            'client_details' => 'nullable|string',
-            'produk.*.nama' => 'nullable|string',
-            'jasa.*.nama' => 'nullable|string',
+            'no_surat'              => 'nullable|string|max:255',
+            'project_no'            => 'nullable|string|max:255',
+            'nama_klien'            => 'required|string|max:255',
+            'client_details'        => 'nullable|string',
+            'perihal'               => 'nullable|string|max:255',
+            'items'                 => 'required|array|min:1',
+            'items.*.nama_produk'   => 'required|string|max:255',
+            'items.*.qty_order'     => 'required|numeric|min:0',
+            'items.*.consumption_l' => 'required|numeric|min:0',
+            'items.*.price_per_liter' => 'required|numeric|min:0',
+            'diskon_global'         => 'nullable|numeric|min:0',
         ]);
 
         return DB::transaction(function () use ($request) {
-            $totalProduk = 0;
-            $totalJasa = 0;
+            $grandTotal = 0;
 
-            // 1. Hitung Total Produk
-            if ($request->has('produk')) {
-                foreach ($request->produk as $p) {
-                    if (!empty($p['nama'])) {
-                        $totalProduk += ((float)($p['volume'] ?? 0) * (float)($p['harga'] ?? 0));
-                    }
+            if ($request->has('items')) {
+                foreach ($request->items as $itemData) {
+                    $consumption = (float)($itemData['consumption_l'] ?? 0);
+                    $price = (float)($itemData['price_per_liter'] ?? 0);
+                    $grandTotal += ($consumption * $price);
                 }
             }
 
-            // 2. Hitung Total Jasa
-            if ($request->has('jasa')) {
-                foreach ($request->jasa as $j) {
-                    if (!empty($j['nama'])) {
-                        $totalJasa += ((float)($j['volume'] ?? 0) * (float)($j['harga'] ?? 0));
-                    }
-                }
-            }
+            $diskonGlobal = (float)($request->diskon_global ?? 0);
+            $finalTotal = max(0, $grandTotal - $diskonGlobal);
 
-            // 3. Simpan Offer Utama
             $offer = Offer::create([
-                'nama_klien'            => $request->nama_klien,
-                'client_details'        => $request->client_details,
-                'total_keseluruhan'     => $totalProduk + $totalJasa,
-                'pisah_kriteria_total'  => $request->has('pisah_kriteria_total') ? 1 : 0,
-                'hilangkan_grand_total' => $request->has('hilangkan_grand_total') ? 1 : 0,
-                'jenis_penawaran'       => 'jasa',
+                'no_surat'            => $request->no_surat,
+                'project_no'          => $request->project_no,
+                'client_id'           => $request->client_id,
+                'nama_klien'          => $request->nama_klien,
+                'client_details'      => $request->client_details,
+                'perihal'             => $request->perihal ?? 'Penawaran Quotation Produk',
+                'jenis_penawaran'     => 'produk',
+                'diskon_global'       => $diskonGlobal,
+                'total_keseluruhan'   => $finalTotal,
             ]);
 
-            // 4. Simpan Item Produk
-            if ($request->has('produk')) {
-                foreach ($request->produk as $pData) {
-                    if (!empty($pData['nama'])) {
-                        $offer->items()->create([
-                            'nama_produk'  => $pData['nama'],
-                            'area_dinding' => $pData['area'] ?? '',
-                            'volume'       => (float)($pData['volume'] ?? 0),
-                            'harga_per_m2' => (float)($pData['harga'] ?? 0),
-                        ]);
+            if ($request->has('items')) {
+                foreach ($request->items as $itemData) {
+                    $status = $itemData['status_produk'] ?? 'READY';
+                    if ($status === 'OTHER' && !empty($itemData['status_other'])) {
+                        $status = $itemData['status_other'];
                     }
+
+                    $pricePerLiter = (float)($itemData['price_per_liter'] ?? 0);
+                    $basePrice = (float)($itemData['base_price_per_liter'] ?? 0);
+                    $consumption = (float)($itemData['consumption_l'] ?? 0);
+                    $qtyOrder = (float)($itemData['qty_order'] ?? 0);
+
+                    $offer->items()->create([
+                        'product_id'           => $itemData['product_id'] ?? null,
+                        'nama_produk'          => $itemData['nama_produk'],
+                        'packing_size'         => $itemData['packing_size'] ?? '',
+                        'qty_order'            => $qtyOrder,
+                        'consumption_l'        => $consumption,
+                        'status_produk'        => $status,
+                        'price_per_liter'      => $pricePerLiter,
+                        'base_price_per_liter' => $basePrice,
+                        'harga_per_m2'         => $pricePerLiter,
+                        'volume'               => $consumption,
+                    ]);
                 }
             }
 
-            // 5. Simpan Item Jasa
-            if ($request->has('jasa')) {
-                foreach ($request->jasa as $jData) {
-                    if (!empty($jData['nama'])) {
-                        $vJ = (float) ($jData['volume'] ?? 0);
-                        $hJ = (float) ($jData['harga'] ?? 0);
-                        $offer->jasaItems()->create([
-                            'nama_jasa'    => $jData['nama'],
-                            'volume'       => $vJ,
-                            'satuan'       => $jData['satuan'] ?? 'Ls',
-                            'harga_satuan' => $hJ,
-                            'harga_jasa'   => $vJ * $hJ,
-                        ]);
-                    }
-                }
-            }
-
-            return redirect()->route('histori.index')->with('success', 'Penawaran berhasil dibuat!');
+            return redirect()->route('histori.index')->with('success', 'Quotation berhasil dibuat!');
         });
     }
 

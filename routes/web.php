@@ -10,6 +10,7 @@ use App\Http\Controllers\BastController;
 use App\Http\Controllers\SkpController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RecapController;
+use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,17 +58,16 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
     });
 
-    // --- MENU PENAWARAN ---
-    Route::prefix('penawaran')->name('penawaran.')->group(function () {
-        // Penawaran PROYEK
-        Route::get('/create-project', [ProductController::class, 'createCombined'])->name('create_combined');
-        Route::post('/store-project', [ProductController::class, 'storeCombined'])->name('store_combined');
+    // --- MASTER DATA KLIEN ---
+    Route::prefix('clients')->name('clients.')->group(function () {
+        Route::get('/', [ClientController::class, 'index'])->name('index');
+        Route::post('/', [ClientController::class, 'store'])->name('store');
+    });
 
-        // Penawaran PRODUK
-        Route::get('/create-product', [ProductOfferController::class, 'create'])->name('create_product');
-        Route::post('/store-product', [ProductOfferController::class, 'store'])->name('store_product');
-        Route::get('/edit-product/{offer}', [ProductOfferController::class, 'edit'])->name('edit_product');
-        Route::put('/update-product/{offer}', [ProductOfferController::class, 'update'])->name('update_product');
+    // --- MENU PENAWARAN / QUOTATION ---
+    Route::prefix('penawaran')->name('penawaran.')->group(function () {
+        Route::get('/create', [OfferController::class, 'create'])->name('create');
+        Route::post('/store', [OfferController::class, 'store'])->name('store');
     });
 
     // --- HISTORI & DETAIL PENAWARAN ---

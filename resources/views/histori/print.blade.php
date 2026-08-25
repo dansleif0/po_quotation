@@ -136,40 +136,31 @@
             $bulanRomawi = [1=>'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=>'IX', 10=>'X', 11=>'XI', 12=>'XII'];
             $romawi = $bulanRomawi[$offer->created_at->format('n')];
             $tahun = $offer->created_at->format('Y');
+            $noSurat = $offer->no_surat ?? ("00" . $offer->id . "/SP/TGI-1/" . $romawi . "/" . $tahun);
             @endphp
             <div>
-                <p>Perihal : {{ $offer->perihal ?? 'Penawaran Jasa Apply dan Supply Pengecatan' }}</p>
-                <p>Nomor : 00{{ $offer->id }}/SP/TGI-1/{{ $romawi }}/{{ $tahun }}</p>
+                <p class="font-semibold text-gray-800">Perihal : {{ $offer->perihal ?? 'Penawaran Quotation Produk' }}</p>
+                <p class="font-mono font-bold text-blue-700">Nomor : {{ $noSurat }}</p>
+                @if($offer->project_no)
+                <p class="font-semibold text-gray-700">Project No : <span class="font-bold text-gray-900">{{ $offer->project_no }}</span></p>
+                @endif
             </div>
             <div class="text-right">
-
                 <p>Batam, {{ $offer->created_at->format('d F Y') }}</p>
             </div>
         </section>
 
-        <section class="mt-8 text-sm sans">
+        <section class="mt-6 text-sm sans">
             <p class="text-gray-600">Kepada Yth,</p>
             <h3 class="text-md font-bold text-gray-800 uppercase">{{ $offer->nama_klien }}</h3>
             @if($offer->client_details)
-            <p class="text-sm text-gray-700">{{ $offer->client_details }}</p>
+            <p class="text-sm text-gray-700 whitespace-pre-line">{{ $offer->client_details }}</p>
             @endif
-            <p class="text-gray-700 mt-4">Dengan Hormat,</p>
+            <p class="text-gray-700 mt-3">Dengan Hormat,</p>
         </section>
 
         <section class="mt-4 space-y-4 text-sm text-gray-700 leading-relaxed">
-            <p>Kami PT. TASNIEM GERAI INSPIRASI adalah dealer resmi PT. JOTUN INDONESIA dan toko pertama Jotun Flagship terbesar di Kota Batam yang merupakan reatil Supply Cat Jotun Dekoratif, Selain sebagai Supply kami juga bergerak di bidang Sipil lainnya antara lain sebagai berikut:</a>.</p>
-            <div>
-                <p>Kami PT Tasniem Gerai Inspirasi begerak di bidang Painting Dan Pekerjaan Sipil lainnya :</p>
-                <ol class="list-decimal list-inside ml-4">
-                    <li>Jasa Apply dan Supply pengecatan Property</li>
-                    <li>Jasa Apply dan Supply Pengecatan lantai Epoxy</li>
-                    <li>Jasa Pemasangan Partisi, Plafon Gypsum dan Sudah plafon</li>
-                    <li>Supply Cat jotun Marine</li>
-                    <li>Supply Cat jotun Protective</li>
-                    <li>Desain dan Pabrikasi Interior</li>
-                </ol>
-            </div>
-            <p>Dengan ini kami sampaikan penawaran Jasa Apply dan Supply pengecatan Sebagai berikut:</p>
+            <p>Kami PT. TASNIEM GERAI INSPIRASI adalah dealer resmi PT. JOTUN INDONESIA dan toko pertama Jotun Flagship terbesar di Kota Batam yang merupakan retail Supply Cat Jotun Dekoratif & Industrial. Berikut kami sampaikan rincian penawaran harga (Quotation):</p>
         </section>
         {{-- PHP LOGIC --}}
         @php
@@ -198,7 +189,7 @@
         $globalIndex = 0;
         @endphp
 
-        <section class="mt-8 sans text-sm">
+        <section class="mt-6 sans text-sm">
             <div class="w-full">
 
                 {{-- KASUS 1: SPLIT --}}
@@ -318,41 +309,38 @@
                 </div>
                 @endif
 
-                {{-- KASUS 2: DEFAULT --}}
+                {{-- KASUS 2: QUOTATION PRODUCTS TABLE --}}
                 @else
-                <table class="w-full text-left border-collapse page-break-inside-avoid mb-6">
+                <table class="w-full text-left border-collapse page-break-inside-avoid mb-6 text-xs border border-gray-300">
                     <thead class="bg-gray-200 text-black">
                         <tr>
-                            @if($offer->opsi_paket)
-                            <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Opsi Paket</th>
-                            @endif
-                            <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Area Pekerjaan</th>
-                            <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Nama Brand</th>
-                            <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Produk</th>
-                            <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Volume/M²</th>
-                            <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Harga Satuan</th>
-                            <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Total</th>
+                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-center w-6">No</th>
+                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300">Nama Produk</th>
+                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300">Packing Size</th>
+                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-right">Qty</th>
+                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-right">Consumption (L)</th>
+                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-center">Status</th>
+                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-right">Price/L (+40%)</th>
+                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-right">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($offer->items as $index => $item)
-                        <tr class="border-b border-gray-500">
-                            @if($offer->opsi_paket)
-                            <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">Paket {{ chr(65 + $index) }}</td>
-                            @endif
-                            <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->area_dinding }}</td>
-                            <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">
-                                @php $p = \App\Models\Product::where('nama_produk', $item->nama_produk)->first(); @endphp
-                                {{ $p->performa ?? '-' }}
-                            </td>
-                            <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->nama_produk }}</td>
-                            <td class="py-1 px-1 text-[10px] text-gray-700 leading-none text-right whitespace-nowrap align-middle">{{ $item->volume }}</td>
-                            <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">
-                                <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->harga_per_m2, 0, ',', '.') }}</span></div>
-                            </td>
-                            <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap font-medium align-middle">
-                                <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->volume * $item->harga_per_m2, 0, ',', '.') }}</span></div>
-                            </td>
+                        @php
+                            $qty = $item->qty_order > 0 ? $item->qty_order : 1;
+                            $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
+                            $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
+                            $subtotal = $consumption * $priceL;
+                        @endphp
+                        <tr class="border-b border-gray-300">
+                            <td class="py-1.5 px-1 text-center border border-gray-300">{{ $index + 1 }}</td>
+                            <td class="py-1.5 px-1 font-bold border border-gray-300">{{ $item->nama_produk }}</td>
+                            <td class="py-1.5 px-1 border border-gray-300">{{ $item->packing_size ?: '-' }}</td>
+                            <td class="py-1.5 px-1 text-right border border-gray-300">{{ $qty + 0 }}</td>
+                            <td class="py-1.5 px-1 text-right font-bold border border-gray-300">{{ $consumption + 0 }} L</td>
+                            <td class="py-1.5 px-1 text-center font-semibold border border-gray-300">{{ $item->status_produk ?: 'READY' }}</td>
+                            <td class="py-1.5 px-1 text-right border border-gray-300">Rp {{ number_format($priceL, 0, ',', '.') }}</td>
+                            <td class="py-1.5 px-1 text-right font-bold border border-gray-300">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                         </tr>
                         @endforeach
                     </tbody>

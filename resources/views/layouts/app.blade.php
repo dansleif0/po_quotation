@@ -119,30 +119,14 @@
                     <span class="font-medium">Harga Produk</span>
                 </a>
 
-                <div x-data="{ open: false }">
-                    <button @click="open = !open" onclick="toggleSubmenu('penawaran-submenu', 'penawaran-icon')"
-                        class="w-full flex items-center justify-between px-4 py-3 text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-xl transition-all group focus:outline-none">
-                        <div class="flex items-center">
-                            <span class="mr-3 p-2 bg-slate-800 rounded-lg group-hover:bg-blue-500 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </span>
-                            <span class="font-medium">Buat Penawaran</span>
-                        </div>
-                        <svg id="penawaran-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                <a href="{{ route('penawaran.create') }}" class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-xl transition-all duration-200 group">
+                    <span class="mr-3 p-2 bg-slate-800 rounded-lg group-hover:bg-blue-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                    </button>
-                    <div id="penawaran-submenu" class="submenu space-y-1">
-                        <a href="{{ route('penawaran.create_combined') }}" class="flex items-center px-4 py-2.5 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform tracking-wide italic">
-                            <span class="mr-2 text-blue-500">•</span> Penawaran Proyek
-                        </a>
-                        <a href="{{ route('penawaran.create_product') }}" class="flex items-center px-4 py-2.5 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform tracking-wide italic">
-                            <span class="mr-2 text-blue-500">•</span> Penawaran Produk
-                        </a>
-                    </div>
-                </div>
+                    </span>
+                    <span class="font-medium">Buat Quotation</span>
+                </a>
 
                 <div x-data="{ open: false }" class="mt-4">
                     <button @click="open = !open" onclick="toggleSubmenu('histori-submenu', 'histori-icon')"

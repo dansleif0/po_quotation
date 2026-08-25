@@ -16,9 +16,31 @@ class Product extends Model
      */
     protected $fillable = [
         'nama_produk',
+        'generic',
+        'primer_topcoat',
+        'category',
+        'thinner',
+        'packing_size',
+        'price_per_l',
         'hasil_akhir',
-        'kriteria', // <-- Tanda koma ditambahkan di sini
+        'kriteria',
         'performa',
         'harga',
     ];
+
+    /**
+     * Relationship to ProductBatch
+     */
+    public function batches()
+    {
+        return $this->hasMany(ProductBatch::class);
+    }
+
+    /**
+     * Relationship to ProductPacking
+     */
+    public function packings()
+    {
+        return $this->hasMany(ProductPacking::class);
+    }
 }

@@ -14,13 +14,69 @@ class ProductController extends Controller
     // 1. MASTER DATA PRODUK (DAFTAR HARGA)
     // =========================================================================
 
-    // Menampilkan daftar harga (Read)
-    public function index()
+    // =========================================================================
+    // 1. MASTER DATA PRODUK (DAFTAR HARGA)
+    // =========================================================================
+
+    // Menampilkan daftar harga (Read) dengan pencarian & filter (Generic, Primer/Topcoat, Category, Thinner)
+    public function index(Request $request)
     {
-        // Mengambil semua produk diurutkan terbaru
-        $products = Product::latest()->get();
-        // Pastikan view ini ada di: resources/views/harga/index.blade.php
-        return view('harga.index', ['products' => $products]);
+        $search              = trim($request->input('search'));
+        $filterGeneric       = trim($request->input('generic'));
+        $filterPrimerTopcoat = trim($request->input('primer_topcoat'));
+        $filterCategory      = trim($request->input('category'));
+        $filterThinner       = trim($request->input('thinner'));
+
+        $query = Product::with(['batches', 'packings']);
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_produk', 'LIKE', "%{$search}%")
+                  ->orWhere('generic', 'LIKE', "%{$search}%")
+                  ->orWhere('category', 'LIKE', "%{$search}%")
+                  ->orWhere('primer_topcoat', 'LIKE', "%{$search}%")
+                  ->orWhere('thinner', 'LIKE', "%{$search}%")
+                  ->orWhereHas('batches', function ($bq) use ($search) {
+                      $bq->where('batch_number', 'LIKE', "%{$search}%");
+                  })
+                  ->orWhereHas('packings', function ($pq) use ($search) {
+                      $pq->where('packing_size', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        if (!empty($filterGeneric)) {
+            $query->where('generic', $filterGeneric);
+        }
+
+        if (!empty($filterPrimerTopcoat)) {
+            $query->where('primer_topcoat', $filterPrimerTopcoat);
+        }
+
+        if (!empty($filterCategory)) {
+            $query->where('category', $filterCategory);
+        }
+
+        if (!empty($filterThinner)) {
+            $query->where('thinner', $filterThinner);
+        }
+
+        $products = $query->latest()->get();
+
+        // Opsi filter dari database
+        $genericsList = Product::whereNotNull('generic')->where('generic', '!=', '')->distinct()->orderBy('generic')->pluck('generic');
+        $thinnersList = Product::whereNotNull('thinner')->where('thinner', '!=', '')->distinct()->orderBy('thinner')->pluck('thinner');
+
+        return view('harga.index', compact(
+            'products',
+            'search',
+            'filterGeneric',
+            'filterPrimerTopcoat',
+            'filterCategory',
+            'filterThinner',
+            'genericsList',
+            'thinnersList'
+        ));
     }
 
     // Form tambah harga baru (Create View)
@@ -32,61 +88,162 @@ class ProductController extends Controller
     // Menyimpan data harga baru (Create Action)
     public function store(Request $request)
     {
-        // 1. Validasi Input (Sesuai dengan form di harga/create.blade.php)
+        // 1. Validasi Input
         $request->validate([
-            'nama_produk' => 'required|string|max:255',
-            'performa'    => 'required|string|max:255', // Ini adalah input "Nama Brand"
-            'kriteria'    => 'required|string|in:Exterior,Interior',
-            'hasil_akhir' => 'required|string|max:255',
-            'harga'       => 'required|integer|min:0',
+            'nama_produk'    => 'required|string|max:255',
+            'generic'        => 'nullable|string|max:255',
+            'primer_topcoat' => 'nullable|string|in:Primer,Topcoat',
+            'category'       => 'nullable|string|in:Marine,Marine & PC,PC - Floor Coating',
+            'thinner'        => 'nullable|string|max:255',
+            'price_per_l'    => 'required|numeric|min:0',
+            'packing_sizes'  => 'nullable|array',
+            'packing_sizes.*'=> 'nullable|string|max:255',
+            'batch_numbers'  => 'nullable|array',
+            'batch_numbers.*'=> 'nullable|string|max:255',
         ]);
 
-        // 2. Simpan ke Database
-        Product::create([
-            'nama_produk' => $request->nama_produk,
-            'performa'    => $request->performa, // Menyimpan Brand
-            'kriteria'    => $request->kriteria,
-            'hasil_akhir' => $request->hasil_akhir,
-            'harga'       => $request->harga,
-        ]);
+        DB::beginTransaction();
+        try {
+            // Ambil packing size pertama jika ada untuk kolom legacy
+            $firstPacking = null;
+            if ($request->has('packing_sizes') && is_array($request->packing_sizes)) {
+                foreach ($request->packing_sizes as $p) {
+                    if (!empty(trim($p))) {
+                        $firstPacking = trim($p);
+                        break;
+                    }
+                }
+            }
 
-        // 3. Redirect kembali ke index dengan pesan sukses
-        return redirect()->route('harga.index')->with('success', 'Data harga berhasil ditambahkan!');
+            // 2. Simpan Produk
+            $product = Product::create([
+                'nama_produk'    => $request->nama_produk,
+                'generic'        => $request->generic,
+                'primer_topcoat' => $request->primer_topcoat,
+                'category'       => $request->category,
+                'thinner'        => $request->thinner,
+                'packing_size'   => $firstPacking,
+                'price_per_l'    => $request->price_per_l,
+                'harga'          => $request->price_per_l, // Untuk backward compatibility
+            ]);
+
+            // 3. Simpan Packing Sizes
+            if ($request->has('packing_sizes') && is_array($request->packing_sizes)) {
+                foreach ($request->packing_sizes as $packSize) {
+                    $trimmed = trim($packSize);
+                    if (!empty($trimmed)) {
+                        $product->packings()->create([
+                            'packing_size' => $trimmed,
+                        ]);
+                    }
+                }
+            }
+
+            // 4. Simpan Batch Numbers
+            if ($request->has('batch_numbers') && is_array($request->batch_numbers)) {
+                foreach ($request->batch_numbers as $batchNum) {
+                    $trimmed = trim($batchNum);
+                    if (!empty($trimmed)) {
+                        $product->batches()->create([
+                            'batch_number' => $trimmed,
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('harga.index')->with('success', 'Data produk berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Gagal menambahkan produk: ' . $e->getMessage());
+        }
     }
 
     // Form edit harga (Edit View)
     public function edit(Product $product)
     {
-        return view('harga.edit', ['product' => $product]);
+        $product->load(['batches', 'packings']);
+        return view('harga.edit', compact('product'));
     }
 
     // Update data harga (Update Action)
     public function update(Request $request, Product $product)
     {
         $request->validate([
-            'nama_produk' => 'required|string|max:255',
-            'performa'    => 'required|string|max:255',
-            'kriteria'    => 'required|string|in:Exterior,Interior',
-            'hasil_akhir' => 'required|string|max:255',
-            'harga'       => 'required|integer|min:0',
+            'nama_produk'    => 'required|string|max:255',
+            'generic'        => 'nullable|string|max:255',
+            'primer_topcoat' => 'nullable|string|in:Primer,Topcoat',
+            'category'       => 'nullable|string|in:Marine,Marine & PC,PC - Floor Coating',
+            'thinner'        => 'nullable|string|max:255',
+            'price_per_l'    => 'required|numeric|min:0',
+            'packing_sizes'  => 'nullable|array',
+            'packing_sizes.*'=> 'nullable|string|max:255',
+            'batch_numbers'  => 'nullable|array',
+            'batch_numbers.*'=> 'nullable|string|max:255',
         ]);
 
-        $product->update([
-            'nama_produk' => $request->nama_produk,
-            'performa'    => $request->performa,
-            'kriteria'    => $request->kriteria,
-            'hasil_akhir' => $request->hasil_akhir,
-            'harga'       => $request->harga,
-        ]);
+        DB::beginTransaction();
+        try {
+            $firstPacking = null;
+            if ($request->has('packing_sizes') && is_array($request->packing_sizes)) {
+                foreach ($request->packing_sizes as $p) {
+                    if (!empty(trim($p))) {
+                        $firstPacking = trim($p);
+                        break;
+                    }
+                }
+            }
 
-        return redirect()->route('harga.index')->with('success', 'Data harga berhasil diperbarui!');
+            $product->update([
+                'nama_produk'    => $request->nama_produk,
+                'generic'        => $request->generic,
+                'primer_topcoat' => $request->primer_topcoat,
+                'category'       => $request->category,
+                'thinner'        => $request->thinner,
+                'packing_size'   => $firstPacking,
+                'price_per_l'    => $request->price_per_l,
+                'harga'          => $request->price_per_l, // Untuk backward compatibility
+            ]);
+
+            // Sync Packing Sizes
+            $product->packings()->delete();
+            if ($request->has('packing_sizes') && is_array($request->packing_sizes)) {
+                foreach ($request->packing_sizes as $packSize) {
+                    $trimmed = trim($packSize);
+                    if (!empty($trimmed)) {
+                        $product->packings()->create([
+                            'packing_size' => $trimmed,
+                        ]);
+                    }
+                }
+            }
+
+            // Sync Batch Numbers
+            $product->batches()->delete();
+            if ($request->has('batch_numbers') && is_array($request->batch_numbers)) {
+                foreach ($request->batch_numbers as $batchNum) {
+                    $trimmed = trim($batchNum);
+                    if (!empty($trimmed)) {
+                        $product->batches()->create([
+                            'batch_number' => $trimmed,
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('harga.index')->with('success', 'Data produk berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Gagal memperbarui produk: ' . $e->getMessage());
+        }
     }
 
     // Menghapus data harga (Delete Action)
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('harga.index')->with('success', 'Data berhasil dihapus!');
+        return redirect()->route('harga.index')->with('success', 'Data produk berhasil dihapus!');
     }
 
     // =========================================================================

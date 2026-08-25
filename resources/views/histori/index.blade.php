@@ -8,11 +8,8 @@
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <h1 class="text-3xl font-bold text-gray-800">Histori Penawaran</h1>
             <div class="flex gap-2">
-                <a href="{{ route('penawaran.create_product') }}" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition shadow-sm text-sm">
-                    + Penawaran Produk
-                </a>
-                <a href="{{ route('penawaran.create_combined') }}" class="bg-gray-800 text-white font-bold py-2 px-4 rounded hover:bg-gray-700 transition shadow-sm text-sm">
-                    + Penawaran Proyek
+                <a href="{{ route('penawaran.create') }}" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm flex items-center gap-2">
+                    + Buat Quotation
                 </a>
             </div>
         </div>

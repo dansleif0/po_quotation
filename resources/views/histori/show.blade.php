@@ -34,40 +34,31 @@
             $bulanRomawi = [1=>'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=>'IX', 10=>'X', 11=>'XI', 12=>'XII'];
             $romawi = $bulanRomawi[$offer->created_at->format('n')];
             $tahun = $offer->created_at->format('Y');
+            $noSurat = $offer->no_surat ?? ("00" . $offer->id . "/SP/TGI-1/" . $romawi . "/" . $tahun);
             @endphp
             <div>
-                <p>Perihal : {{ $offer->perihal ?? 'Penawaran Jasa Apply dan Supply Pengecatan' }}</p>
-                <p>Nomor : 00{{ $offer->id }}/SP/TGI-1/{{ $romawi }}/{{ $tahun }}</p>
+                <p class="font-semibold text-gray-800">Perihal : {{ $offer->perihal ?? 'Penawaran Quotation Produk' }}</p>
+                <p class="font-mono font-bold text-blue-700">Nomor : {{ $noSurat }}</p>
+                @if($offer->project_no)
+                <p class="font-semibold text-gray-700">Project No : <span class="font-bold text-gray-900">{{ $offer->project_no }}</span></p>
+                @endif
             </div>
             <div class="text-right">
-
                 <p>Batam, {{ $offer->created_at->format('d F Y') }}</p>
             </div>
         </section>
 
-        <section class="mt-8">
+        <section class="mt-6">
             <p class="text-gray-600">Kepada Yth,</p>
             <h3 class="text-md font-bold text-gray-800">{{ $offer->nama_klien }}</h3>
             @if($offer->client_details)
-            <p class="text-sm text-gray-700">{{ $offer->client_details }}</p>
+            <p class="text-sm text-gray-700 whitespace-pre-line">{{ $offer->client_details }}</p>
             @endif
             <p class="text-gray-700 mt-2">Dengan Hormat,</p>
         </section>
 
         <section class="mt-4 space-y-4 text-sm text-gray-700 leading-relaxed">
-            <p>Kami PT. TASNIEM GERAI INSPIRASI adalah dealer resmi PT. JOTUN INDONESIA dan toko pertama Jotun Flagship terbesar di Kota Batam yang merupakan reatil Supply Cat Jotun Dekoratif, Selain sebagai Supply kami juga bergerak di bidang Sipil lainnya antara lain sebagai berikut:</a>.</p>
-            <div>
-                <p>Kami PT Tasniem Gerai Inspirasi begerak di bidang Painting Dan Pekerjaan Sipil lainnya :</p>
-                <ol class="list-decimal list-inside ml-4">
-                    <li>Jasa Apply dan Supply pengecatan Property</li>
-                    <li>Jasa Apply dan Supply Pengecatan lantai Epoxy</li>
-                    <li>Jasa Pemasangan Partisi, Plafon Gypsum dan Sudah plafon</li>
-                    <li>Supply Cat jotun Marine</li>
-                    <li>Supply Cat jotun Protective</li>
-                    <li>Desain dan Pabrikasi Interior</li>
-                </ol>
-            </div>
-            <p>Dengan ini kami sampaikan penawaran Jasa Apply dan Supply pengecatan Sebagai berikut:</p>
+            <p>Kami PT. TASNIEM GERAI INSPIRASI adalah dealer resmi PT. JOTUN INDONESIA dan toko pertama Jotun Flagship terbesar di Kota Batam yang merupakan retail Supply Cat Jotun Dekoratif & Industrial. Berikut kami sampaikan rincian penawaran harga (Quotation):</p>
         </section>
 
         {{-- PHP LOGIC --}}
@@ -219,41 +210,42 @@
                 </div>
                 @endif
 
-                {{-- KASUS 2: DEFAULT --}}
+                {{-- KASUS 2: QUOTATION PRODUCTS TABLE --}}
                 @else
-                <table class="w-full text-left border-collapse page-break-inside-avoid">
+                <table class="w-full text-left border-collapse page-break-inside-avoid text-xs">
                     <thead class="bg-gray-800 text-white">
                         <tr>
-                            @if($offer->opsi_paket)
-                            <th class="py-2 px-2 font-semibold uppercase text-xs w-[12%] whitespace-nowrap align-middle">Opsi Paket</th>
-                            @endif
-                            <th class="py-2 px-2 font-semibold uppercase text-xs w-[28%] whitespace-nowrap align-middle">Area Pekerjaan</th>
-                            <th class="py-2 px-2 font-semibold uppercase text-xs w-[12%] whitespace-nowrap align-middle">Nama Brand</th>
-                            <th class="py-2 px-2 font-semibold uppercase text-xs w-[20%] whitespace-nowrap align-middle">Produk</th>
-                            <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[10%] whitespace-nowrap align-middle">Volume/M²</th>
-                            <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[15%] whitespace-nowrap align-middle">Harga Satuan</th>
-                            <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[15%] whitespace-nowrap align-middle">Total</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs w-8">No</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs">Nama Produk</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs">Packing Size</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs text-right">Qty Order</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs text-right">Consumption (L)</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs text-center">Status</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs text-right">Price/L (+40%)</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs text-right">Subtotal</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-gray-200">
                         @foreach($offer->items as $index => $item)
-                        <tr class="border-b border-gray-500">
-                            @if($offer->opsi_paket)
-                            <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">Paket {{ chr(65 + $index) }}</td>
-                            @endif
-                            <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->area_dinding }}</td>
-                            <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">
-                                @php $p = \App\Models\Product::where('nama_produk', $item->nama_produk)->first(); @endphp
-                                {{ $p->performa ?? '-' }}
+                        @php
+                            $qty = $item->qty_order > 0 ? $item->qty_order : 1;
+                            $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
+                            $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
+                            $subtotal = $consumption * $priceL;
+                        @endphp
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 px-2 text-gray-600 align-middle text-center">{{ $index + 1 }}</td>
+                            <td class="py-2 px-2 text-gray-900 font-bold align-middle">{{ $item->nama_produk }}</td>
+                            <td class="py-2 px-2 text-gray-700 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                            <td class="py-2 px-2 text-gray-700 text-right align-middle font-semibold">{{ $qty + 0 }}</td>
+                            <td class="py-2 px-2 text-gray-700 text-right font-bold align-middle text-blue-700">{{ $consumption + 0 }} L</td>
+                            <td class="py-2 px-2 align-middle text-center">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">
+                                    {{ $item->status_produk ?: 'READY' }}
+                                </span>
                             </td>
-                            <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->nama_produk }}</td>
-                            <td class="py-1 px-2 text-xs text-gray-700 leading-none text-right whitespace-nowrap align-middle">{{ $item->volume }}</td>
-                            <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">
-                                <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->harga_per_m2, 0, ',', '.') }}</span></div>
-                            </td>
-                            <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap font-medium align-middle">
-                                <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->volume * $item->harga_per_m2, 0, ',', '.') }}</span></div>
-                            </td>
+                            <td class="py-2 px-2 text-gray-700 text-right align-middle">Rp {{ number_format($priceL, 0, ',', '.') }}</td>
+                            <td class="py-2 px-2 text-gray-900 font-extrabold text-right align-middle">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
