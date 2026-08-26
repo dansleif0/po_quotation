@@ -22,11 +22,8 @@
         {{-- HEADER KOP SURAT --}}
         <header class="w-full mb-6">
             <div class="w-full">
-                {{-- Menggunakan class w-full agar gambar memenuhi lebar kontainer --}}
                 <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat PT Tasniem Gerai Inspirasi" class="w-full h-auto">
             </div>
-            {{-- Garis merah di bawah tetap dipertahankan atau dihapus sesuai keinginan --}}
-            <div class="w-full border-b-[4px] border-[#d32f2f] mt-1"></div>
         </header>
 
         <section class="mb-6 text-sm sans flex justify-between items-start">
@@ -34,7 +31,8 @@
             $bulanRomawi = [1=>'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=>'IX', 10=>'X', 11=>'XI', 12=>'XII'];
             $romawi = $bulanRomawi[$offer->created_at->format('n')];
             $tahun = $offer->created_at->format('Y');
-            $noSurat = $offer->no_surat ?? ("00" . $offer->id . "/SP/TGI-1/" . $romawi . "/" . $tahun);
+            $seq     = str_pad(10132 + $offer->id, 7, '0', STR_PAD_LEFT);
+            $noSurat = $offer->no_surat ?? ($seq . "/SP/TGI-1/" . $romawi . "/" . $tahun);
             @endphp
             <div>
                 <p class="font-semibold text-gray-800">Perihal : {{ $offer->perihal ?? 'Penawaran Quotation Produk' }}</p>

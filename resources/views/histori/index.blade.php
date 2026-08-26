@@ -6,7 +6,7 @@
 
         {{-- Header & Tombol --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h1 class="text-3xl font-bold text-gray-800">Histori Penawaran</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Histori Quotation</h1>
             <div class="flex gap-2">
                 <a href="{{ route('penawaran.create') }}" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm flex items-center gap-2">
                     + Buat Quotation
@@ -62,22 +62,19 @@
 
                                 <div x-show="open" @click.away="open = false" x-transition class="origin-top-left absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="display: none;">
                                     <div class="py-1" role="menu">
-                                        <a href="{{ route('histori.show', ['offer' => $offer->id]) }}" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100">👁️ Lihat / Print</a>
+                                        <a href="{{ route('histori.show', ['offer' => $offer->id]) }}" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">👁️ Lihat / Print</a>
                                         <div class="border-t border-gray-100 my-1"></div>
-                                        <a href="{{ route('invoice.create_from_offer', ['offer' => $offer->id]) }}" class="text-green-700 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">💰 Buat Invoice</a>
-                                        <a href="{{ route('skp.create', ['offer' => $offer->id]) }}" class="text-indigo-700 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">📝 Buat SPK</a>
-                                        <a href="{{ route('bast.create', ['offer' => $offer->id]) }}" class="text-teal-700 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">🤝 Buat BAST</a>
-                                        <a href="{{ route('histori.recap', ['offer' => $offer->id]) }}" class="text-blue-700 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">📋 Buat Rekapan</a>
+                                        <a href="{{ route('po.create', ['offer_id' => $offer->id]) }}" class="text-emerald-700 block px-4 py-2 text-sm hover:bg-gray-100 font-bold">🛒 Buat PO</a>
                                         <div class="border-t border-gray-100 my-1"></div>
                                         @if($offer->jenis_penawaran == 'produk')
-                                            <a href="{{ route('penawaran.edit_product', ['offer' => $offer->id]) }}" class="text-yellow-600 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">✏️ Edit Produk</a>
+                                            <a href="{{ route('penawaran.edit_product', ['offer' => $offer->id]) }}" class="text-yellow-600 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">✏️ Edit</a>
                                         @else
-                                            <a href="{{ route('histori.edit', ['offer' => $offer->id]) }}" class="text-yellow-600 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">✏️ Edit Proyek</a>
+                                            <a href="{{ route('histori.edit', ['offer' => $offer->id]) }}" class="text-yellow-600 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">✏️ Edit</a>
                                         @endif
                                         <div class="border-t border-gray-100 my-1"></div>
                                         <form action="{{ route('histori.destroy', ['offer' => $offer->id]) }}" method="POST" onsubmit="return confirm('Hapus penawaran ini?');">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="w-full text-left text-red-700 block px-4 py-2 text-sm hover:bg-gray-100">🗑️ Delete</button>
+                                            <button type="submit" class="w-full text-left text-red-700 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">🗑️ Delete</button>
                                         </form>
                                     </div>
                                 </div>
@@ -131,7 +128,7 @@
                     @empty
                     <tr>
                         <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                            <span class="text-lg font-medium">Belum ada histori penawaran.</span>
+                            <span class="text-lg font-medium">Belum ada histori quotation.</span>
                         </td>
                     </tr>
                     @endforelse

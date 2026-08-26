@@ -11,6 +11,7 @@ use App\Http\Controllers\SkpController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RecapController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\PoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('penawaran')->name('penawaran.')->group(function () {
         Route::get('/create', [OfferController::class, 'create'])->name('create');
         Route::post('/store', [OfferController::class, 'store'])->name('store');
+        Route::get('/{offer}/edit-product', [OfferController::class, 'edit'])->name('edit_product');
     });
 
     // --- HISTORI & DETAIL PENAWARAN ---
@@ -78,6 +80,16 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{offer}', [OfferController::class, 'update'])->name('update');
         Route::delete('/{offer}', [OfferController::class, 'destroy'])->name('destroy');
         Route::get('/{offer}/print', [OfferController::class, 'print'])->name('print');
+    });
+
+    // --- HISTORI PO (PURCHASE ORDER) ---
+    Route::prefix('histori-po')->name('po.')->group(function () {
+        Route::get('/', [PoController::class, 'index'])->name('index');
+        Route::get('/tambah', [PoController::class, 'create'])->name('create');
+        Route::post('/store', [PoController::class, 'store'])->name('store');
+        Route::get('/{id}', [PoController::class, 'show'])->name('show');
+        Route::get('/{id}/print', [PoController::class, 'print'])->name('print');
+        Route::delete('/{id}', [PoController::class, 'destroy'])->name('destroy');
     });
 
     // --- INVOICE ---

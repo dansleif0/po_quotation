@@ -33,12 +33,19 @@ class OfferController extends Controller
         $clients = Client::orderBy('nama_klien', 'asc')->get();
         $products = Product::orderBy('nama_produk', 'asc')->get();
 
-        // Generate No. Surat Otomatis: QUO/YYYY/MM/XXXX
-        $countToday = Offer::whereYear('created_at', date('Y'))
-            ->whereMonth('created_at', date('m'))
-            ->count() + 1;
+        // Format No. Surat Resmi Kantor: 0010133/SP/TGI-1/VIII/2026
+        $bulanRomawi = [
+            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
+            7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
+        ];
+        $romawi = $bulanRomawi[(int)date('n')];
+        $tahun  = date('Y');
 
-        $noSurat = 'QUO/' . date('Y/m/') . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+        $lastOffer = Offer::latest('id')->first();
+        $nextId = ($lastOffer ? $lastOffer->id : 0) + 1;
+        $seq = str_pad(10132 + $nextId, 7, '0', STR_PAD_LEFT);
+
+        $noSurat = "{$seq}/SP/TGI-1/{$romawi}/{$tahun}";
 
         return view('penawaran.create', compact('clients', 'products', 'noSurat'));
     }

@@ -145,25 +145,12 @@
                     </button>
 
                     <div id="histori-submenu" class="submenu space-y-1">
-                        {{-- Histori Rekapan (Tambahan Baru) --}}
-                        <a href="{{ route('recap.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic">
-                            <span class="mr-2 text-emerald-500">•</span> Histori Rekapan Biaya
-                        </a>
-
                         <a href="{{ route('histori.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic">
-                            <span class="mr-2 text-blue-500">•</span> Histori Penawaran
+                            <span class="mr-2 text-blue-500">•</span> Histori Quotation
                         </a>
 
-                        <a href="{{ route('invoice.histori') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic">
-                            <span class="mr-2 text-blue-500">•</span> Histori Invoice
-                        </a>
-
-                        <a href="{{ route('bast.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic">
-                            <span class="mr-2 text-blue-500">•</span> Histori BAST
-                        </a>
-
-                        <a href="{{ route('skp.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic">
-                            <span class="mr-2 text-blue-500">•</span> Histori SPK
+                        <a href="{{ route('po.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic">
+                            <span class="mr-2 text-emerald-500">•</span> Histori PO
                         </a>
                     </div>
                 </div>

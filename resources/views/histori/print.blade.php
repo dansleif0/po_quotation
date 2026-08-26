@@ -4,24 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Penawaran - {{ $offer->nama_klien }}</title>
+    <title>Cetak Quotation - {{ $offer->nama_klien }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* CSS KHUSUS PRINT A4 */
         @media print {
             @page {
                 size: A4;
-                margin: 0;
-                /* Margin dikontrol via padding di container agar presisi */
+                margin: 12.7mm; /* Narrow Margin (0.5 in) */
             }
 
             body {
                 background-color: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
-                font-family: 'Calibri', Arial, Helvetica, sans-serif !important;
+                font-family: 'Times New Roman', Times, serif !important;
                 font-size: 11pt;
             }
 
@@ -29,33 +27,14 @@
                 display: none !important;
             }
 
-            /* Paksa Kontainer mengikuti ukuran A4 Murni */
             #print-paper {
-                width: 210mm;
-                min-height: 297mm;
-                padding: 15mm 20mm !important;
-                /* Standar margin surat resmi */
-                margin: 0 auto !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 box-shadow: none !important;
                 border: none !important;
             }
 
-            /* LOGIKA PRINT TANPA KOP */
-            .hide-header-on-print .invoice-header {
-                display: none !important;
-            }
-
-            .hide-header-on-print #print-paper {
-                padding-top: 65mm !important;
-                /* Jarak pas agar teks mulai di bawah Kop Fisik */
-            }
-
-            /* Mencegah Tanda Tangan terpisah dari kalimat penutup di halaman berbeda */
-            .signature-wrapper {
-                page-break-inside: avoid;
-            }
-
-            /* Optimasi Tabel agar tidak berantakan saat pindah halaman */
             table {
                 page-break-inside: auto;
                 width: 100%;
@@ -64,31 +43,22 @@
 
             tr {
                 page-break-inside: avoid;
-                page-break-after: auto;
-            }
-
-            thead {
-                display: table-header-group;
-            }
-
-            .border-print {
-                border: 1px solid #000 !important;
             }
         }
 
-        /* Gaya Tampilan di Browser (Preview Mode) */
         body {
             background-color: #f4f4f4;
             font-family: 'Times New Roman', Times, serif;
+            color: #000000;
         }
 
         #print-paper {
             background-color: white;
             width: 210mm;
             min-height: 297mm;
-            margin: 30px auto;
-            padding: 20mm;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+            padding: 12.7mm; /* Narrow Margin (0.5 in) */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             position: relative;
         }
 
@@ -101,8 +71,14 @@
             gap: 10px;
         }
 
-        .sans {
-            font-family: Arial, Helvetica, sans-serif;
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #000000;
+            padding: 5px 8px;
         }
     </style>
 </head>
@@ -111,355 +87,171 @@
 
     {{-- Navigasi Terapung (Hanya muncul di layar) --}}
     <div class="nav-floating no-print">
-        <button onclick="printWithHeader()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow-xl flex items-center gap-2 transition transform hover:scale-105">
-            <span>🖨️</span> Cetak Normal
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-full shadow-xl flex items-center gap-2 transition cursor-pointer">
+            <span>🖨️</span> Cetak Quotation
         </button>
-        <button onclick="printWithoutHeader()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-full shadow-xl flex items-center gap-2 transition transform hover:scale-105">
-            <span>📄</span> Tanpa Kop Surat
-        </button>
-        <button onclick="window.close()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition">
+        <button onclick="window.close()" class="bg-slate-600 hover:bg-slate-700 text-white font-bold py-2.5 px-5 rounded-full shadow-lg transition cursor-pointer">
             Tutup
         </button>
     </div>
 
-    <div id="print-content" class="max-w-[21cm] mx-auto p-12 print:m-0 print:shadow-none">
-        {{-- HEADER KOP SURAT --}}
-        <header class="w-full mb-6 invoice-header"> {{-- Tambahkan class invoice-header di sini --}}
-            <div class="w-full">
-                <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat PT Tasniem Gerai Inspirasi" class="w-full h-auto">
-            </div>
-        </header>
+    <div id="print-paper" class="print:m-0 print:p-0 print:shadow-none">
 
-        {{-- KONTEN PENAWARAN --}}
-        <section class="mb-6 text-sm sans flex justify-between items-start">
-            @php
-            $bulanRomawi = [1=>'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=>'IX', 10=>'X', 11=>'XI', 12=>'XII'];
-            $romawi = $bulanRomawi[$offer->created_at->format('n')];
-            $tahun = $offer->created_at->format('Y');
-            $noSurat = $offer->no_surat ?? ("00" . $offer->id . "/SP/TGI-1/" . $romawi . "/" . $tahun);
-            @endphp
-            <div>
-                <p class="font-semibold text-gray-800">Perihal : {{ $offer->perihal ?? 'Penawaran Quotation Produk' }}</p>
-                <p class="font-mono font-bold text-blue-700">Nomor : {{ $noSurat }}</p>
-                @if($offer->project_no)
-                <p class="font-semibold text-gray-700">Project No : <span class="font-bold text-gray-900">{{ $offer->project_no }}</span></p>
-                @endif
-            </div>
-            <div class="text-right">
-                <p>Batam, {{ $offer->created_at->format('d F Y') }}</p>
-            </div>
-        </section>
-
-        <section class="mt-6 text-sm sans">
-            <p class="text-gray-600">Kepada Yth,</p>
-            <h3 class="text-md font-bold text-gray-800 uppercase">{{ $offer->nama_klien }}</h3>
-            @if($offer->client_details)
-            <p class="text-sm text-gray-700 whitespace-pre-line">{{ $offer->client_details }}</p>
-            @endif
-            <p class="text-gray-700 mt-3">Dengan Hormat,</p>
-        </section>
-
-        <section class="mt-4 space-y-4 text-sm text-gray-700 leading-relaxed">
-            <p>Kami PT. TASNIEM GERAI INSPIRASI adalah dealer resmi PT. JOTUN INDONESIA dan toko pertama Jotun Flagship terbesar di Kota Batam yang merupakan retail Supply Cat Jotun Dekoratif & Industrial. Berikut kami sampaikan rincian penawaran harga (Quotation):</p>
-        </section>
-        {{-- PHP LOGIC --}}
         @php
-        $isSplit = $offer->pisah_kriteria_total;
-        $showTotal = !$offer->hilangkan_grand_total;
-        $totalJasa = $offer->jasaItems->sum('harga_jasa');
+            $bulanIndo = [
+                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
+                7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            ];
+            $bulanRomawi = [1=>'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=>'IX', 10=>'X', 11=>'XI', 12=>'XII'];
 
-        $exteriorItems = collect();
-        $interiorItems = collect();
-        $totalExterior = 0;
-        $totalInterior = 0;
+            $dateObj = $offer->created_at ?? now();
+            $tglStr = $dateObj->format('j') . ' ' . ($bulanIndo[$dateObj->format('n')] ?? $dateObj->format('F')) . ' ' . $dateObj->format('Y');
 
-        if ($isSplit) {
-        $exteriorItems = $offer->items->filter(function($item) {
-        $prod = \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
-        return $prod && $prod->kriteria == 'Exterior';
-        });
-        $totalExterior = $exteriorItems->sum(function($item) { return $item->volume * $item->harga_per_m2; });
-
-        $interiorItems = $offer->items->filter(function($item) {
-        $prod = \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
-        return !$prod || $prod->kriteria != 'Exterior';
-        });
-        $totalInterior = $interiorItems->sum(function($item) { return $item->volume * $item->harga_per_m2; });
-        }
-        $globalIndex = 0;
+            $romawi = $bulanRomawi[$dateObj->format('n')];
+            $tahun  = $dateObj->format('Y');
+            $seq    = str_pad(10132 + $offer->id, 7, '0', STR_PAD_LEFT);
+            $noSurat = $offer->no_surat ?? ($seq . "/SP/TGI-1/" . $romawi . "/" . $tahun);
         @endphp
 
-        <section class="mt-6 sans text-sm">
-            <div class="w-full">
+        {{-- Official Kop Surat Header --}}
+        <div class="w-full mb-5">
+            <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat PT Tasniem Gerai Inspirasi" class="w-full h-auto object-contain">
+        </div>
 
-                {{-- KASUS 1: SPLIT --}}
-                @if($isSplit)
+        {{-- Top Header Date & Letter No --}}
+        <div class="text-base mb-5">
+            <p>Batam, {{ $tglStr }}</p>
+            <p>Nomor. : {{ $noSurat }}</p>
+        </div>
 
-                {{-- EXTERIOR --}}
-                @if($exteriorItems->isNotEmpty())
-                <div class="mb-8 page-break-inside-avoid">
-                    <h4 class="font-bold text-gray-800 mb-2 uppercase border-b-2 border-gray-800 inline-block text-sm">Pekerjaan Exterior</h4>
-                    <table class="w-full text-left border-collapse mb-4">
-                        <thead class="bg-gray-200 text-black">
-                            <tr>
-                                @if($offer->opsi_paket)
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Opsi Paket</th>
-                                @endif
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Area Pekerjaan</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Nama Brand</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Produk</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Volume/M²</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Harga Satuan</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($exteriorItems as $item)
-                            <tr class="border-b border-gray-500">
-                                @if($offer->opsi_paket)
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">Paket {{ chr(65 + $globalIndex) }}</td>
-                                @php $globalIndex++; @endphp
-                                @endif
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->area_dinding }}</td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">
-                                    @php $p = \App\Models\Product::where('nama_produk', $item->nama_produk)->first(); @endphp
-                                    {{ $p ? $p->performa : 'Jotun' }}
-                                </td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->nama_produk }}</td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none text-right whitespace-nowrap align-middle">{{ $item->volume }}</td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->harga_per_m2, 0, ',', '.') }}</span></div>
-                                </td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap font-medium align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->volume * $item->harga_per_m2, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                        @if($showTotal)
-                        <tfoot>
-                            <tr class="bg-gray-100 font-bold text-gray-800">
-                                <td colspan="{{ $offer->opsi_paket ? 4 : 3 }}" class="py-1 px-1 text-xs text-right uppercase align-middle">Total Exterior</td>
-                                <td class="py-1 px-1 text-xs text-right align-middle">{{ $exteriorItems->sum('volume') + 0 }}</td>
-                                <td class="py-1 px-1 text-xs align-middle"></td>
-                                <td class="py-1 px-1 text-xs text-right whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($totalExterior, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                        </tfoot>
-                        @endif
-                    </table>
-                </div>
-                @endif
+        {{-- Recipient Information --}}
+        <div class="text-base mb-5">
+            <p>Kepada Yth,</p>
+            <p class="font-bold uppercase mt-1.5 text-lg">{{ $offer->nama_klien }}</p>
+            @if($offer->client_details)
+                <p class="text-sm text-gray-800 whitespace-pre-line">{{ $offer->client_details }}</p>
+            @endif
+            <p class="mt-2">Dengan Hormat,</p>
+        </div>
 
-                {{-- INTERIOR --}}
-                @if($interiorItems->isNotEmpty())
-                <div class="mb-8 page-break-inside-avoid">
-                    <h4 class="font-bold text-gray-800 mb-2 uppercase border-b-2 border-gray-800 inline-block text-sm">Pekerjaan Interior</h4>
-                    <table class="w-full text-left border-collapse mb-4">
-                        <thead class="bg-gray-200 text-black">
-                            <tr>
-                                @if($offer->opsi_paket)
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Opsi Paket</th>
-                                @endif
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Area Pekerjaan</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Nama Brand</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] whitespace-nowrap align-middle">Produk</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Volume/M²</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Harga Satuan</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-[10px] text-right whitespace-nowrap align-middle">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($interiorItems as $item)
-                            <tr class="border-b border-gray-500">
-                                @if($offer->opsi_paket)
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">Paket {{ chr(65 + $globalIndex) }}</td>
-                                @php $globalIndex++; @endphp
-                                @endif
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->area_dinding }}</td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">
-                                    @php $p = \App\Models\Product::where('nama_produk', $item->nama_produk)->first(); @endphp
-                                    {{ $p->performa ?? '-' }}
-                                </td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->nama_produk }}</td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none text-right whitespace-nowrap align-middle">{{ $item->volume }}</td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->harga_per_m2, 0, ',', '.') }}</span></div>
-                                </td>
-                                <td class="py-1 px-1 text-[10px] text-gray-700 leading-none whitespace-nowrap font-medium align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->volume * $item->harga_per_m2, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                        @if($showTotal)
-                        <tfoot>
-                            <tr class="bg-gray-100 font-bold text-gray-800">
-                                <td colspan="{{ $offer->opsi_paket ? 4 : 3 }}" class="py-1 px-1 text-xs text-right uppercase align-middle">Total Interior</td>
-                                <td class="py-1 px-1 text-xs text-right align-middle">{{ $interiorItems->sum('volume') + 0 }}</td>
-                                <td class="py-1 px-1 text-xs align-middle"></td>
-                                <td class="py-1 px-1 text-xs text-right whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($totalInterior, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                        </tfoot>
-                        @endif
-                    </table>
-                </div>
-                @endif
-
-                {{-- KASUS 2: QUOTATION PRODUCTS TABLE --}}
-                @else
-                <table class="w-full text-left border-collapse page-break-inside-avoid mb-6 text-xs border border-gray-300">
-                    <thead class="bg-gray-200 text-black">
-                        <tr>
-                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-center w-6">No</th>
-                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300">Nama Produk</th>
-                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300">Packing Size</th>
-                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-right">Qty</th>
-                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-right">Consumption (L)</th>
-                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-center">Status</th>
-                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-right">Price/L (+40%)</th>
-                            <th class="py-2 px-1 font-bold uppercase text-[10px] border border-gray-300 text-right">Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($offer->items as $index => $item)
-                        @php
-                            $qty = $item->qty_order > 0 ? $item->qty_order : 1;
-                            $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
-                            $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
-                            $subtotal = $consumption * $priceL;
-                        @endphp
-                        <tr class="border-b border-gray-300">
-                            <td class="py-1.5 px-1 text-center border border-gray-300">{{ $index + 1 }}</td>
-                            <td class="py-1.5 px-1 font-bold border border-gray-300">{{ $item->nama_produk }}</td>
-                            <td class="py-1.5 px-1 border border-gray-300">{{ $item->packing_size ?: '-' }}</td>
-                            <td class="py-1.5 px-1 text-right border border-gray-300">{{ $qty + 0 }}</td>
-                            <td class="py-1.5 px-1 text-right font-bold border border-gray-300">{{ $consumption + 0 }} L</td>
-                            <td class="py-1.5 px-1 text-center font-semibold border border-gray-300">{{ $item->status_produk ?: 'READY' }}</td>
-                            <td class="py-1.5 px-1 text-right border border-gray-300">Rp {{ number_format($priceL, 0, ',', '.') }}</td>
-                            <td class="py-1.5 px-1 text-right font-bold border border-gray-300">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                @endif
-
-                {{-- TABEL JASA (DENGAN TOTAL) --}}
-                @if($offer->jasaItems->isNotEmpty())
-                <div class="mt-4 page-break-inside-avoid">
-                    <h4 class="font-bold text-gray-800 mb-2 uppercase border-b-2 border-gray-800 inline-block text-sm">Pengerjaan Tambahan</h4>
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-200 text-black">
-                            <tr>
-                                <th class="py-2 px-1 font-semibold uppercase text-xs w-[50%] align-middle" colspan="3">Deskripsi Pengerjaan</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-xs text-right w-[10%] align-middle">Vol/Sat</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-xs text-right w-[20%] align-middle">Harga Satuan</th>
-                                <th class="py-2 px-1 font-semibold uppercase text-xs text-right w-[20%] align-middle">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($offer->jasaItems as $jasa)
-                            <tr class="border-b border-gray-200">
-                                <td class="py-1 px-1 font-medium text-gray-800 text-xs leading-none align-middle" colspan="3">{{ $jasa->nama_jasa }}</td>
-                                <td class="py-1 px-1 text-right text-xs leading-none align-middle whitespace-nowrap">{{ $jasa->volume + 0 }} {{ $jasa->satuan }}</td>
-                                <td class="py-1 px-1 text-xs leading-none whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($jasa->harga_satuan, 0, ',', '.') }}</span></div>
-                                </td>
-                                <td class="py-1 px-1 text-xs leading-none whitespace-nowrap font-bold text-gray-900 align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($jasa->harga_jasa, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                        @if($showTotal)
-                        <tfoot>
-                            <tr class="bg-gray-100 font-bold text-gray-800">
-                                <td colspan="5" class="py-1 px-1 text-xs text-right uppercase align-middle">Total Pengerjaan Tambahan</td>
-                                <td class="py-1 px-1 text-xs text-right whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($totalJasa, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                        </tfoot>
-                        @endif
-                    </table>
-                </div>
-                @endif
-
+        {{-- Introduction Body Text --}}
+        <div class="text-base space-y-2.5 mb-5 text-justify">
+            <p>
+                Kami PT. TASNIEM GERAI INSPIRASI adalah dealer resmi resmi PT. JOTUN INDONESIA, didirikan pada tanggal 4 Februari 2010, Konsep Inspirasi Centre pertama di kota Batam dan pertama di Indonesia, website <a href="https://tasniemgroup.com" target="_blank" class="text-blue-700 underline">https://tasniemgroup.com</a>.
+            </p>
+            <div>
+                <p>Kami PT Tasniem Gerai Inspirasi bergerak di bidang Painting Dan Pekerjaan Sipil lainnya :</p>
+                <ol class="list-decimal list-inside ml-2 space-y-0.5 mt-1">
+                    <li>Pekerjaan pengecatan dan perawatan gedung</li>
+                    <li>Pemasangan partisi dan plafon Finising gypsum dan plafon sunda Plafon</li>
+                    <li>Pekerjaan Pengecatan Lantai epoxy</li>
+                </ol>
             </div>
-        </section>
-
-        @if($showTotal)
-        <section class="mt-4 flex justify-end sans" id="grand-total-block">
-            <div class="w-full md:w-6/12">
-                <div class="flex justify-between items-center bg-gray-800 text-white p-3 rounded-lg print:bg-white print:text-black print:p-0">
-                    <span class="text-lg font-bold uppercase">Grand Total</span>
-                    <span class="text-xl font-bold whitespace-nowrap flex gap-2">
-                        <span>Rp</span>
-                        <span>{{ number_format($offer->total_keseluruhan, 0, ',', '.') }}</span>
-                    </span>
-                </div>
+            <div>
+                <p>Dengan ini kami sampaikan penawaran Harga cat Jotun :</p>
+                <p class="font-bold mt-1">Project NO : {{ $offer->project_no ?: 'HYDRATE' }}</p>
             </div>
-        </section>
-        @endif
+        </div>
 
-         <section class="mt-8 text-sm text-gray-700 leading-relaxed">
-            <h4 class="font-semibold text-gray-800">Teknis pengerjaan:</h4>
-            <ul class="list-disc list-inside ml-4 mt-2">
-                <li>Semua peralatan pekerjaan akan disiapkan oleh pihak PT. Tasniem Gerai Inspirasi</li>
-                <li>Perbaikan dan Dempul retakan tembok area pengerjaan</li>
-                <li>Cleaning area sebelum melakukan pekerjaan</li>
-                <li>Pengaplikasikan Cat Dasar (Sealer)</li>
-                <li>Pengaplikasikan Topcoat minimal 2 kali lapis</li>
-                <li>Finish.</li>
+        {{-- Quotation Items Table --}}
+        <div class="my-5 overflow-x-auto">
+            <table class="w-full text-xs text-black border border-black">
+                <thead>
+                    <tr class="bg-gray-100 font-bold text-center">
+                        <th class="w-8 border border-black py-2 px-1">NO</th>
+                        <th class="border border-black py-2 px-2 text-left min-w-[180px]">Product</th>
+                        <th class="w-24 border border-black py-2 px-1 text-center">Packing<br>Size (L)</th>
+                        <th class="w-20 border border-black py-2 px-1 text-center">Qty<br>Order</th>
+                        <th class="w-24 border border-black py-2 px-1 text-center">Consumption<br>(L)</th>
+                        <th class="w-28 border border-black py-2 px-1 text-center">Product</th>
+                        <th class="w-28 border border-black py-2 px-2 text-right">Price per (L)</th>
+                        <th class="w-32 border border-black py-2 px-2 text-right">Total price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php $sumTotal = 0; @endphp
+                    @foreach($offer->items as $idx => $item)
+                    @php
+                        $qty = $item->qty_order > 0 ? $item->qty_order : 1;
+                        $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
+                        $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
+                        $rowTotal = $consumption * $priceL;
+                        $sumTotal += $rowTotal;
+                    @endphp
+                    <tr>
+                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $idx + 1 }}</td>
+                        <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">{{ $item->nama_produk }}</td>
+                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
+                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
+                        <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
+                        <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($priceL, 0, ',', '.') }}</td>
+                        <td class="text-right border border-black py-1.5 px-2 align-middle font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                    @if($offer->diskon_global > 0)
+                    <tr>
+                        <td colspan="7" class="text-right border border-black py-1.5 px-2 font-bold">Subtotal</td>
+                        <td class="text-right border border-black py-1.5 px-2 font-bold">{{ number_format($sumTotal, 0, ',', '.') }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="7" class="text-right border border-black py-1.5 px-2 font-bold text-red-600">Diskon Global</td>
+                        <td class="text-right border border-black py-1.5 px-2 font-bold text-red-600">- {{ number_format($offer->diskon_global, 0, ',', '.') }}</td>
+                    </tr>
+                    @endif
+                </tbody>
+                <tfoot>
+                    <tr class="font-bold">
+                        <td colspan="7" class="border border-black py-2 px-2 text-left font-bold text-xs">
+                            Note : Quantity will be adjusted to Jotun standard packing size
+                        </td>
+                        <td class="border border-black py-2 px-2 text-right font-extrabold text-sm">
+                            {{ number_format($offer->diskon_global > 0 ? max(0, $sumTotal - $offer->diskon_global) : ($offer->total_keseluruhan ?: $sumTotal), 0, ',', '.') }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        {{-- Sales Condition Section --}}
+        <div class="text-sm my-5">
+            <p class="font-semibold mb-1">Sales Condition :</p>
+            <ul class="space-y-0.5 ml-2">
+                <li>- Above Prices are Franco Batam</li>
+                <li>- Above Prices are include Discount</li>
+                <li>- Above Prices are Exclude PPn 11% ( Free PPn Valid For Batam, Bintan, & Karimun area )</li>
+                <li>- Additional Surcharge ( Boat, Agent, Crane, etc ) will be taken By Customer</li>
+                <li>- Coating Advisor Rate Per Day USD 150 (Free of Charge for this project 7-14 days)</li>
+                <li>- Working days 2-3 days after PO Received for Available Stock</li>
+                <li>- Working days 3-4 Weeks Working Days for Special Products Made to Order (MTO)</li>
+                <li>- Min 100 Litres For Free Delivery order</li>
+                <li>- Payment Term : 30 Days</li>
             </ul>
-        </section>
+        </div>
 
-        <section class="mt-8 text-sm text-gray-700 leading-relaxed">
-            <h4 class="font-semibold text-gray-800">Beberapa Hal yang perlu kami sampaikan sebelum pengerjaan :</h4>
-            <ul class="list-disc list-inside ml-4 mt-2">
-                <li>Permohonan untuk Air, Listrik dan Gudang peyimpanan alat-alat kerja di siapkan oleh Pemberi Kerja</li>
-                <li>Down Payment minimal 30% dibayarkan sebelum pekerjaan di mulai</li>
-                <li>Payment kedua sebesar 30 %dibayarkan pada saat pengerjaan berlangsung</li>
-                <li>Pelunasan sebesar 40% di bayarkan setelah Pengerjaan selesai dan telah di lakukan pengecekan Bersama</li>
-                <li>Harga penawaran diatas berlaku 30 hari sejak tanggal surat penawaran di tebitkan</li>
-            </ul>
-        </section>
-
-        <section class="text-md font-bold text-gray-800">
-            <p>NB : Surat Ini Berlaku Sampai dengan Tanggal {{ $offer->created_at->copy()->addDays(30)->format('d F Y') }}.</p>
-        </section>
-
-        <section class="mt-6 text-sm text-gray-700 sans page-break-inside-avoid">
+        {{-- Closing Statement --}}
+        <div class="text-base my-5">
             <p>Demikianlah surat penawaran ini kami sampaikan, semoga dapat disetujui.</p>
-        </section>
+        </div>
 
-        {{-- TANDA TANGAN --}}
-        <section class="mt-12 flex justify-end sans">
-            <div class="text-center w-56">
+        {{-- Signature Block --}}
+        <div class="mt-8 flex justify-end text-base">
+            <div class="text-center w-64">
                 <p>Hormat kami,</p>
-                <div class="h-28 flex items-center justify-center">
-                    <img src="{{ asset('images/ttd.png') }}" alt="Tanda Tangan" class="h-24 object-contain">
+                <div class="h-20 flex items-center justify-center my-2">
+                    @if(file_exists(public_path('images/ttd.png')))
+                        <img src="{{ asset('images/ttd.png') }}" alt="Tanda Tangan" class="h-20 object-contain">
+                    @else
+                        <div class="h-16"></div>
+                    @endif
                 </div>
-                <p class="font-bold text-gray-800 border-b border-black inline-block pb-0.5 uppercase">SAMSU RIZAL</p>
-                <p class="text-xs text-gray-600 mt-1">General Manager</p>
+                <p class="font-bold underline uppercase text-base">SAMSU RIZAL</p>
+                <p class="text-sm">General Manager</p>
             </div>
-        </section>
+        </div>
+
     </div>
 
-    <script>
-        function printWithHeader() {
-            document.body.classList.remove('hide-header-on-print');
-            window.print();
-        }
-
-        function printWithoutHeader() {
-            document.body.classList.add('hide-header-on-print');
-            window.print();
-        }
-    </script>
 </body>
 
 </html>

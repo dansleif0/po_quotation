@@ -19,7 +19,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Kembali ke Histori
+            Kembali ke Histori Quotation
         </a>
     </div>
 
@@ -83,7 +83,7 @@
                     </label>
                     <div class="flex gap-2">
                         <div class="relative flex-1">
-                            <select id="client_select" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-slate-800 appearance-none bg-white pr-10">
+                            <select id="client_select" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-slate-800 appearance-none bg-white pr-10 shadow-sm font-medium">
                                 <option value="">-- Pilih Klien Terdaftar --</option>
                                 @foreach ($clients as $client)
                                 <option value="{{ $client->id }}" data-nama="{{ $client->nama_klien }}" data-details="{{ $client->client_details ?? $client->alamat }}">
@@ -100,18 +100,18 @@
 
                         {{-- Tombol (+) Tambah Klien Modal --}}
                         <button type="button" id="btnOpenClientModal" title="Tambah Klien Baru"
-                            class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            style="background-color: #059669 !important; color: #ffffff !important;"
+                            class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 text-sm shrink-0 whitespace-nowrap cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-current" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                             </svg>
-                            <span>Tambah</span>
+                            <span class="font-bold">Tambah Klien Baru</span>
                         </button>
                     </div>
 
-                    {{-- Input Hidden & Text Nama Klien (bisa manual jika belum pilih) --}}
+                    {{-- Input Hidden Nama Klien & Client ID --}}
                     <input type="hidden" name="client_id" id="client_id">
-                    <input type="text" name="nama_klien" id="nama_klien" required placeholder="Atau ketik nama klien secara manual..."
-                        class="mt-2.5 w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-slate-800">
+                    <input type="hidden" name="nama_klien" id="nama_klien">
                 </div>
 
                 {{-- Detail Alamat / Kontak Klien --}}
@@ -161,10 +161,9 @@
                         <tr class="bg-slate-100/80 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
                             <th class="p-3 rounded-l-xl w-10 text-center">#</th>
                             <th class="p-3 min-w-[220px]">Pilih Produk</th>
-                            <th class="p-3 min-w-[180px]">Nama Produk</th>
-                            <th class="p-3 w-28">Packing Size</th>
-                            <th class="p-3 w-24 text-right">Qty Order</th>
-                            <th class="p-3 w-28 text-right">Consumption (L)</th>
+                            <th class="p-3 min-w-[130px]">Packing Size</th>
+                            <th class="p-3 min-w-[100px] text-center">Qty Order</th>
+                            <th class="p-3 min-w-[110px] text-right">Consumption (L)</th>
                             <th class="p-3 min-w-[160px]">Status</th>
                             <th class="p-3 min-w-[150px] text-right">Price / L (+40%)</th>
                             <th class="p-3 min-w-[150px] text-right">Subtotal (Rp)</th>
@@ -201,14 +200,18 @@
 
         {{-- Form Actions --}}
         <div class="flex items-center justify-end gap-4 mb-12">
-            <a href="{{ route('histori.index') }}" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-sm transition-all">
+            <a href="{{ route('histori.index') }}"
+                style="background-color: #f1f5f9 !important; color: #475569 !important;"
+                class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all cursor-pointer">
                 Batal
             </a>
-            <button type="submit" class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-sm transition-all shadow-xl shadow-blue-500/25 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <button type="submit" id="btnSubmitQuotation"
+                style="background-color: #2563eb !important; color: #ffffff !important;"
+                class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-all shadow-xl shadow-blue-500/25 flex items-center gap-2.5 cursor-pointer shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-current text-white" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                Simpan & Terbitkan Quotation
+                <span class="font-bold text-white tracking-wide">Simpan & Terbitkan Quotation</span>
             </button>
         </div>
     </form>
@@ -219,12 +222,12 @@
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden transform transition-all">
         <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
             <h3 class="text-base font-bold flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400 fill-current" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                 </svg>
                 Tambah Klien Baru
             </h3>
-            <button type="button" id="btnCloseClientModal" class="text-slate-400 hover:text-white transition">
+            <button type="button" id="btnCloseClientModal" class="text-slate-400 hover:text-white transition cursor-pointer">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -262,20 +265,63 @@
             </div>
 
             <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                <button type="button" id="btnCancelClientModal" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-sm transition">
+                <button type="button" id="btnCancelClientModal"
+                    style="background-color: #f1f5f9 !important; color: #475569 !important;"
+                    class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition cursor-pointer">
                     Batal
                 </button>
-                <button type="submit" id="btnSaveClientModal" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition shadow-md shadow-emerald-600/20">
-                    Simpan Klien
+                <button type="submit" id="btnSaveClientModal"
+                    style="background-color: #059669 !important; color: #ffffff !important;"
+                    class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition shadow-md shadow-emerald-600/20 flex items-center gap-2 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Simpan Klien</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
 
+{{-- Toast Notification --}}
+<div id="toastNotification" class="fixed top-6 right-6 z-50 transform transition-all duration-300 -translate-y-20 opacity-0 pointer-events-none">
+    <div class="bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50" style="background-color: #059669 !important; color: #ffffff !important;">
+        <div class="p-1 bg-white/20 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white fill-current" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+        </div>
+        <div>
+            <p class="font-bold text-sm" id="toastMessage">Klien berhasil disimpan!</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ts-control {
+        border-radius: 0.75rem !important;
+        padding: 0.75rem 1rem !important;
+        border-color: #cbd5e1 !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        color: #1e293b !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    }
+    .ts-wrapper.single .ts-control {
+        background-color: #ffffff !important;
+    }
+    .ts-dropdown {
+        border-radius: 0.75rem !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+        border-color: #cbd5e1 !important;
+        font-size: 0.875rem !important;
+    }
+</style>
+
 <script>
     // Data produk terdaftar dari backend
     const registeredProducts = @json($products);
+    let clientsList = @json($clients);
     let rowCounter = 0;
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -297,9 +343,52 @@
             formAddClient.reset();
         }
 
+        function showClientToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = msg;
+
+            toast.classList.remove('-translate-y-20', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3500);
+        }
+
         btnOpenClientModal.addEventListener('click', openModal);
         btnCloseClientModal.addEventListener('click', closeModal);
         btnCancelClientModal.addEventListener('click', closeModal);
+
+        // Inisialisasi TomSelect agar Nama Klien Bisa Dicari Manual Secara Ketik
+        let tomClient = null;
+        if (window.TomSelect && clientSelect) {
+            tomClient = new TomSelect('#client_select', {
+                create: true,
+                placeholder: '-- Ketik / Cari Nama Klien --',
+                allowEmptyOption: true,
+                onChange: function(value) {
+                    if (!value) {
+                        inputClientId.value = '';
+                        inputNamaKlien.value = '';
+                        txtClientDetails.value = '';
+                        return;
+                    }
+
+                    const found = clientsList.find(c => c.id == value);
+                    if (found) {
+                        inputClientId.value = found.id;
+                        inputNamaKlien.value = found.nama_klien;
+                        txtClientDetails.value = found.client_details || found.alamat || '';
+                    } else {
+                        // User mengetik nama klien baru secara manual
+                        inputClientId.value = '';
+                        inputNamaKlien.value = value;
+                    }
+                }
+            });
+        }
 
         // Submit Add Client Modal via AJAX
         formAddClient.addEventListener('submit', function(e) {
@@ -329,18 +418,32 @@
             .then(data => {
                 if (data.success && data.client) {
                     const c = data.client;
-                    const option = new Option(c.nama_klien, c.id, true, true);
-                    option.dataset.nama = c.nama_klien;
-                    option.dataset.details = c.client_details || '';
-                    clientSelect.add(option);
+                    clientsList.push(c);
+
+                    if (tomClient) {
+                        tomClient.addOption({
+                            value: c.id,
+                            text: c.nama_klien
+                        });
+                        tomClient.setValue(c.id);
+                    } else {
+                        const option = new Option(c.nama_klien, c.id, true, true);
+                        option.dataset.nama = c.nama_klien;
+                        option.dataset.details = c.client_details || '';
+                        clientSelect.add(option);
+                        clientSelect.value = c.id;
+                    }
 
                     inputClientId.value = c.id;
                     inputNamaKlien.value = c.nama_klien;
                     txtClientDetails.value = c.client_details || '';
-                    
+
                     closeModal();
+
+                    // Tampilkan Notifikasi Sukses
+                    showClientToast(`Klien "${c.nama_klien}" berhasil disimpan!`);
                 } else {
-                    alert('Gagal menambah klien.');
+                    alert(data.message || 'Gagal menambah klien.');
                 }
             })
             .catch(err => {
@@ -349,17 +452,31 @@
             });
         });
 
-        // Event change dropdown client
-        clientSelect.addEventListener('change', function() {
+        // Event change dropdown client fallback
+        if (!tomClient && clientSelect) {
+            clientSelect.addEventListener('change', function() {
+                const selectedOpt = clientSelect.options[clientSelect.selectedIndex];
+                if (selectedOpt && selectedOpt.value) {
+                    inputClientId.value = selectedOpt.value;
+                    inputNamaKlien.value = selectedOpt.dataset.nama || selectedOpt.text;
+                    txtClientDetails.value = selectedOpt.dataset.details || '';
+                } else {
+                    inputClientId.value = '';
+                    inputNamaKlien.value = '';
+                    txtClientDetails.value = '';
+                }
+            });
+        }
+
+        // Sync initial selection if exists
+        if (clientSelect && clientSelect.value && !tomClient) {
             const selectedOpt = clientSelect.options[clientSelect.selectedIndex];
-            if (selectedOpt.value) {
+            if (selectedOpt && selectedOpt.value) {
                 inputClientId.value = selectedOpt.value;
                 inputNamaKlien.value = selectedOpt.dataset.nama || selectedOpt.text;
                 txtClientDetails.value = selectedOpt.dataset.details || '';
-            } else {
-                inputClientId.value = '';
             }
-        });
+        }
 
         // Dynamic Table Logic
         const tbody = document.getElementById('itemsTbody');
@@ -385,36 +502,42 @@
 
             tr.innerHTML = `
                 <td class="p-3 text-center font-bold text-slate-400 row-number">${tbody.children.length + 1}</td>
-                
+
                 {{-- Select Produk --}}
                 <td class="p-3">
                     <select class="w-full p-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 sel-product" name="items[${rowCounter}][product_id]">
                         ${prodOptions}
                     </select>
+                    <input type="hidden" name="items[${rowCounter}][nama_produk]" class="inp-nama" value="">
                 </td>
 
-                {{-- Nama Produk --}}
-                <td class="p-3">
-                    <input type="text" name="items[${rowCounter}][nama_produk]" required placeholder="Nama produk..."
-                        class="w-full p-2.5 rounded-lg border border-slate-300 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 inp-nama">
-                </td>
-
-                {{-- Packing Size --}}
-                <td class="p-3">
-                    <input type="text" name="items[${rowCounter}][packing_size]" placeholder="Misal: 5 L / 20 L"
-                        class="w-full p-2.5 rounded-lg border border-slate-300 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 inp-packing">
+                {{-- Packing Size Dropdown --}}
+                <td class="p-3 min-w-[120px]">
+                    <select name="items[${rowCounter}][packing_size]"
+                        class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:ring-2 focus:ring-blue-500 sel-packing shadow-sm cursor-pointer"
+                        style="color: #1e293b !important; background-color: #ffffff !important;">
+                        <option value="1 L">1 L</option>
+                        <option value="2.5 L">2.5 L</option>
+                        <option value="5 L" selected>5 L</option>
+                        <option value="8.75 L">8.75 L</option>
+                        <option value="18 L">18 L</option>
+                        <option value="20 L">20 L</option>
+                        <option value="25 L">25 L</option>
+                    </select>
                 </td>
 
                 {{-- Qty Order --}}
-                <td class="p-3">
-                    <input type="number" min="0" step="any" name="items[${rowCounter}][qty_order]" value="1" required
-                        class="w-full p-2.5 rounded-lg border border-slate-300 text-xs text-right font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 inp-qty">
+                <td class="p-3 min-w-[100px]">
+                    <input type="number" min="1" step="any" name="items[${rowCounter}][qty_order]" value="1" placeholder="1" required
+                        class="w-full p-2.5 rounded-xl border border-slate-300 text-xs text-center font-extrabold text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 shadow-sm inp-qty"
+                        style="color: #0f172a !important; background-color: #ffffff !important;">
                 </td>
 
-                {{-- Consumption (L) --}}
-                <td class="p-3">
-                    <input type="number" min="0" step="any" name="items[${rowCounter}][consumption_l]" value="1" required
-                        class="w-full p-2.5 rounded-lg border border-slate-300 text-xs text-right font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 inp-consumption">
+                {{-- Consumption (L) - Auto Computed --}}
+                <td class="p-3 min-w-[110px]">
+                    <input type="number" min="0" step="any" name="items[${rowCounter}][consumption_l]" value="5" readonly required
+                        class="w-full p-2.5 rounded-xl border border-slate-200 text-xs text-right font-extrabold text-slate-800 bg-slate-100/80 focus:ring-2 focus:ring-blue-500 inp-consumption cursor-not-allowed"
+                        style="color: #0f172a !important;">
                 </td>
 
                 {{-- Status Dropdown --}}
@@ -456,7 +579,7 @@
             // Row Event Listeners
             const selProduct = tr.querySelector('.sel-product');
             const inpNama = tr.querySelector('.inp-nama');
-            const inpPacking = tr.querySelector('.inp-packing');
+            const selPacking = tr.querySelector('.sel-packing');
             const inpQty = tr.querySelector('.inp-qty');
             const inpConsumption = tr.querySelector('.inp-consumption');
             const selStatus = tr.querySelector('.sel-status');
@@ -469,8 +592,25 @@
             selProduct.addEventListener('change', function() {
                 const opt = selProduct.options[selProduct.selectedIndex];
                 if (opt.value) {
-                    inpNama.value = opt.dataset.nama || '';
-                    inpPacking.value = opt.dataset.packing || '';
+                    inpNama.value = opt.dataset.nama || opt.text;
+
+                    let pSize = opt.dataset.packing ? opt.dataset.packing.trim() : '';
+                    if (pSize) {
+                        let matched = false;
+                        for (let i = 0; i < selPacking.options.length; i++) {
+                            let val = selPacking.options[i].value;
+                            if (val.toString().toLowerCase().includes(pSize.toLowerCase()) || pSize.toLowerCase().includes(val.toString().toLowerCase())) {
+                                selPacking.selectedIndex = i;
+                                matched = true;
+                                break;
+                            }
+                        }
+                        if (!matched) {
+                            let newOpt = new Option(pSize.includes('L') ? pSize : pSize + ' L', pSize.includes('L') ? pSize : pSize + ' L', true, true);
+                            selPacking.add(newOpt);
+                        }
+                    }
+
                     let basePrice = parseFloat(opt.dataset.price || 0);
                     inpBasePrice.value = basePrice;
 
@@ -479,6 +619,7 @@
                     inpPrice.value = markedUpPrice;
                 } else {
                     inpBasePrice.value = 0;
+                    inpNama.value = '';
                 }
                 recalculateRow(tr);
             });
@@ -494,11 +635,12 @@
                 }
             });
 
-            // Quantity & Price change listeners
-            [inpQty, inpConsumption, inpPrice].forEach(input => {
-                input.addEventListener('input', function() {
-                    recalculateRow(tr);
-                });
+            // Packing size, Qty, Consumption & Price change listeners
+            [selPacking, inpQty, inpPrice].forEach(input => {
+                if (input) {
+                    input.addEventListener('change', function() { recalculateRow(tr); });
+                    input.addEventListener('input', function() { recalculateRow(tr); });
+                }
             });
 
             // Delete Row Listener
@@ -513,15 +655,37 @@
             });
 
             updateRowNumbers();
-            calculateTotals();
+            recalculateRow(tr);
+        }
+
+        function getNumericPackingSize(str) {
+            if (!str) return 1;
+            let match = str.toString().match(/([0-9]+(\.[0-9]+)?)/);
+            return match ? parseFloat(match[1]) : 1;
         }
 
         function recalculateRow(tr) {
-            const consumption = parseFloat(tr.querySelector('.inp-consumption').value) || 0;
-            const price = parseFloat(tr.querySelector('.inp-price').value) || 0;
+            const selPacking = tr.querySelector('.sel-packing');
+            const inpQty = tr.querySelector('.inp-qty');
+            const inpConsumption = tr.querySelector('.inp-consumption');
+            const inpPrice = tr.querySelector('.inp-price');
+
+            const packingNum = getNumericPackingSize(selPacking ? selPacking.value : '1');
+            const qty = parseFloat(inpQty ? inpQty.value : 1) || 0;
+
+            // Consumption (L) = Packing Size * Qty Order
+            const consumption = Math.round((packingNum * qty) * 100) / 100;
+            if (inpConsumption) {
+                inpConsumption.value = consumption;
+            }
+
+            const price = parseFloat(inpPrice ? inpPrice.value : 0) || 0;
             const subtotal = Math.round(consumption * price);
 
-            tr.querySelector('.txt-subtotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+            const txtSubtotal = tr.querySelector('.txt-subtotal');
+            if (txtSubtotal) {
+                txtSubtotal.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+            }
             tr.dataset.subtotal = subtotal;
 
             calculateTotals();
@@ -548,8 +712,18 @@
             document.getElementById('txtGrandTotal').textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
         }
 
-        inputDiskonGlobal.addEventListener('input', calculateTotals);
-        btnAddRow.addEventListener('click', createRow);
+        // Validation before submitting form
+        const quotationForm = document.getElementById('quotationForm');
+        if (quotationForm) {
+            quotationForm.addEventListener('submit', function(e) {
+                if (!inputNamaKlien.value || !inputNamaKlien.value.trim()) {
+                    e.preventDefault();
+                    alert('Silakan pilih Klien / Perusahaan terlebih dahulu!');
+                    clientSelect.focus();
+                    return false;
+                }
+            });
+        }
 
         // Init with 1 default row
         createRow();
