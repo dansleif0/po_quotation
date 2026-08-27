@@ -94,12 +94,12 @@
 
         {{-- Official Kop Surat Header & PO Title --}}
         <div class="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div class="w-2/3">
-                <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat PT Tasniem Gerai Inspirasi" class="w-full h-auto object-contain">
+            <div class="flex-1 pr-4">
+                <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat PT Tasniem Gerai Inspirasi" class="max-w-[450px] w-full h-auto object-contain">
             </div>
-            <div class="w-1/3 text-right pt-2">
-                <h1 class="text-xl font-bold tracking-widest uppercase text-slate-900">P U R C H A S E &nbsp; O R D E R</h1>
-                <p class="font-bold text-base mt-1 text-slate-800">{{ $po->po_number }}</p>
+            <div class="text-right pt-1 whitespace-nowrap">
+                <h1 class="text-xl font-bold uppercase text-black font-sans tracking-wide"><u>P U R C H A S E &nbsp; O R D E R</u></h1>
+                <p class="font-bold text-base mt-1 text-black font-sans tracking-tight">{{ $po->po_number }}</p>
             </div>
         </div>
 
@@ -121,24 +121,24 @@
 
             {{-- Box 3: Metadata Grid --}}
             <div class="col-span-4 pl-2 space-y-1.5 text-xs font-bold font-mono">
-                <div class="flex justify-between">
-                    <span class="font-sans">DATE</span>
+                <div class="flex justify-between items-start gap-1">
+                    <span class="font-sans shrink-0">DATE</span>
                     <span>: {{ $tglStr }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="font-sans">CURRENCY</span>
+                <div class="flex justify-between items-start gap-1">
+                    <span class="font-sans shrink-0">CURRENCY</span>
                     <span>: {{ $po->currency ?: 'IDR' }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="font-sans">DELIVERY DATE</span>
+                <div class="flex justify-between items-start gap-1">
+                    <span class="font-sans shrink-0">DELIVERY DATE</span>
                     <span>: {{ $po->delivery_date ?: '-' }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="font-sans">OFFER LETTER</span>
-                    <span class="truncate max-w-[150px]">: {{ $po->offer_letter ?: ($po->offer->no_surat ?? 'WCS-26-0927_J25-5438-01') }}</span>
+                <div class="flex justify-between items-start gap-1">
+                    <span class="font-sans shrink-0">OFFER LETTER</span>
+                    <span class="text-right font-sans break-all">: {{ $po->offer_letter ?: ($po->offer->no_surat ?? '-') }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="font-sans">PAYMENT</span>
+                <div class="flex justify-between items-start gap-1">
+                    <span class="font-sans shrink-0">PAYMENT</span>
                     <span>: {{ $po->payment_term ?: 'BANK TRANSFER' }}</span>
                 </div>
             </div>
@@ -146,7 +146,17 @@
 
         {{-- Job Project Line --}}
         <div class="mb-3 text-sm">
-            <p class="font-bold">JOB <span class="underline">PROJECT</span> : {{ $po->job_project ?: ($po->offer_letter ?: ($po->offer->project_no ?? 'WCS-26-0927_J25-5438-01')) }}</p>
+            @php
+                $jobProjectVal = $po->job_project;
+                if (empty($jobProjectVal) || $jobProjectVal === 'WCS-26-0927_J25-5438-01') {
+                    if ($po->offer) {
+                        $jobProjectVal = !empty($po->offer->project_no) ? $po->offer->project_no : $po->offer->no_surat;
+                    } elseif (!empty($po->offer_letter)) {
+                        $jobProjectVal = $po->offer_letter;
+                    }
+                }
+            @endphp
+            <p class="font-bold">JOB <span class="underline">PROJECT</span> : {{ $jobProjectVal ?: '-' }}</p>
         </div>
 
         {{-- Items Table --}}

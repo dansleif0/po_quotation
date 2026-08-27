@@ -7,7 +7,7 @@
         <h2 class="text-lg font-medium mb-6 text-center text-gray-700">No: {{ $invoice->no_invoice }}</h2>
 
         <!-- Diarahkan ke route 'invoice.update' -->
-        <form id="invoice-form" action="{{ route('invoice.update', $invoice->id) }}" method="POST">
+        <form id="invoice-form" action="{{ route('invoice.update', $invoice->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT') <!-- Method untuk update -->
 
@@ -95,6 +95,25 @@
                          <!-- Mengisi value dari data $invoice -->
                          <input type="number" name="diskon" id="diskon" value="{{ old('diskon', $invoice->diskon) }}" placeholder="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm calc-trigger">
                     </div>
+                </div>
+
+                {{-- Form Upload File PO Client --}}
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <label for="po_file" class="block text-sm font-semibold text-gray-800 mb-1 flex items-center gap-2">
+                        <span>📁 Upload / Ganti File Purchase Order (PO) Client</span>
+                        <span class="text-xs text-blue-600 font-normal">(Foto / PDF, Maks. 10MB)</span>
+                    </label>
+                    <p class="text-xs text-gray-600 mb-2">Unggah bukti dokumen atau foto Purchase Order baru jika ingin mengganti berkas saat ini.</p>
+                    <input type="file" name="po_file" id="po_file" accept="image/*,.pdf"
+                        class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 border border-gray-300 rounded-md bg-white p-1 cursor-pointer">
+                    @if(!empty($invoice->po_file_path))
+                        <div class="mt-3 text-xs text-slate-700 flex items-center gap-2 font-bold bg-white p-2.5 rounded-md border border-blue-300">
+                            <span>File PO terlampir saat ini:</span>
+                            <a href="{{ asset('storage/' . $invoice->po_file_path) }}" target="_blank" class="text-blue-600 underline hover:text-blue-800 flex items-center gap-1 font-bold">
+                                <span>📄 Lihat / Download File PO</span>
+                            </a>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Pekerjaan Tambahan -->

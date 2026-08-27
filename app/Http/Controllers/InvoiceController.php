@@ -71,9 +71,16 @@ class InvoiceController extends Controller
         // Validasi data dasar
         $request->validate([
             'offer_id' => 'required|exists:offers,id',
+            'po_file'  => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,pdf|max:10240',
         ]);
 
         $offer = Offer::find($request->offer_id);
+
+        // Upload File PO dari client jika ada
+        $poFilePath = null;
+        if ($request->hasFile('po_file')) {
+            $poFilePath = $request->file('po_file')->store('po_files', 'public');
+        }
 
         // --- Kalkulasi Total di Backend ---
         $total_penawaran = $offer->total_keseluruhan;
@@ -101,6 +108,7 @@ class InvoiceController extends Controller
             'offer_id' => $offer->id,
             'no_invoice' => $request->no_invoice ?? 'INV-' . date('Ymd') . '-' . $offer->id,
             'nama_klien' => $offer->nama_klien,
+            'po_file_path' => $poFilePath,
             'total_penawaran' => $total_penawaran,
             'total_tambahan' => $total_tambahan,
             'diskon' => $diskon,
@@ -169,11 +177,21 @@ class InvoiceController extends Controller
         // Validasi dasar (tambahkan sesuai kebutuhan)
         $request->validate([
             'diskon' => 'nullable|numeric|min:0',
+            'po_file' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,pdf|max:10240',
             'pekerjaan.*.nama' => 'nullable|string',
             'pekerjaan.*.harga' => 'nullable|numeric|min:0',
             'dp.*.keterangan' => 'nullable|string',
             'dp.*.jumlah' => 'nullable|numeric|min:0',
         ]);
+
+        // Upload/Update file PO jika ada
+        $poFilePath = $invoice->po_file_path;
+        if ($request->hasFile('po_file')) {
+            if ($invoice->po_file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($invoice->po_file_path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($invoice->po_file_path);
+            }
+            $poFilePath = $request->file('po_file')->store('po_files', 'public');
+        }
 
         // --- Kalkulasi Ulang Total di Backend ---
         $total_penawaran = $invoice->total_penawaran; // Ambil dari data yg ada
@@ -198,6 +216,8 @@ class InvoiceController extends Controller
 
         // 1. Update data di tabel 'invoices'
         $invoice->update([
+            'no_invoice' => $request->no_invoice ?: $invoice->no_invoice,
+            'po_file_path' => $poFilePath,
             'total_tambahan' => $total_tambahan,
             'diskon' => $diskon,
             'grand_total' => $grand_total,

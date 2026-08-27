@@ -88,6 +88,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tambah', [PoController::class, 'create'])->name('create');
         Route::post('/store', [PoController::class, 'store'])->name('store');
         Route::get('/{id}', [PoController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [PoController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [PoController::class, 'update'])->name('update');
         Route::get('/{id}/print', [PoController::class, 'print'])->name('print');
         Route::delete('/{id}', [PoController::class, 'destroy'])->name('destroy');
     });

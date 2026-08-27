@@ -64,6 +64,8 @@
                                     <div class="py-1" role="menu">
                                         <a href="{{ route('histori.show', ['offer' => $offer->id]) }}" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100 font-medium">👁️ Lihat / Print</a>
                                         <div class="border-t border-gray-100 my-1"></div>
+                                        <a href="{{ route('invoice.create_from_offer', $offer->id) }}" class="text-blue-700 block px-4 py-2 text-sm hover:bg-gray-100 font-bold">📄 Buat Invoice</a>
+                                        <div class="border-t border-gray-100 my-1"></div>
                                         <a href="{{ route('po.create', ['offer_id' => $offer->id]) }}" class="text-emerald-700 block px-4 py-2 text-sm hover:bg-gray-100 font-bold">🛒 Buat PO</a>
                                         <div class="border-t border-gray-100 my-1"></div>
                                         @if($offer->jenis_penawaran == 'produk')

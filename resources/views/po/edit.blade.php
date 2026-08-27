@@ -6,8 +6,8 @@
     {{-- Top Header --}}
     <div class="flex items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Buat Purchase Order (PO) Baru</h1>
-            <p class="text-sm text-slate-500 mt-1">Isi formulir Purchase Order resmi sesuai format standar PT Tasniem Gerai Inspirasi.</p>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Edit Purchase Order (PO) - {{ $po->po_number }}</h1>
+            <p class="text-sm text-slate-500 mt-1">Perbarui data Purchase Order resmi PT Tasniem Gerai Inspirasi.</p>
         </div>
         <a href="{{ route('po.index') }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition">
             &larr; Kembali
@@ -15,8 +15,9 @@
     </div>
 
     {{-- Form Container --}}
-    <form action="{{ route('po.store') }}" method="POST" id="formCreatePO" class="space-y-6">
+    <form action="{{ route('po.update', $po->id) }}" method="POST" id="formEditPO" class="space-y-6">
         @csrf
+        @method('PUT')
 
         {{-- Card 1: Header Info & Supplier --}}
         <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 space-y-6">
@@ -24,18 +25,18 @@
                 <span>📋 Informasi Dokumen PO & Supplier</span>
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {{-- No. PO --}}
-                <div>
+                <div class="md:col-span-1">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
                         PURCHASE ORDER NO. <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="po_number" id="po_number" value="{{ old('po_number', $poNumber) }}" required
+                    <input type="text" name="po_number" id="po_number" value="{{ old('po_number', $po->po_number) }}" required
                         class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 font-mono font-extrabold text-blue-700 text-sm bg-slate-50/50">
                 </div>
 
                 {{-- Referensi Quotation --}}
-                <div>
+                <div class="md:col-span-2">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
                         Referensi Quotation (Penawaran)
                     </label>
@@ -47,7 +48,7 @@
                                 data-details="{{ $off->client_details }}"
                                 data-no="{{ $off->no_surat }}"
                                 data-project="{{ $off->project_no ?: $off->no_surat }}"
-                                {{ ($selectedOffer && $selectedOffer->id == $off->id) ? 'selected' : '' }}>
+                                {{ (old('offer_id', $po->offer_id) == $off->id) ? 'selected' : '' }}>
                                 {{ $off->no_surat ?: ('Quotation #' . $off->id) }} - {{ $off->nama_klien }}
                             </option>
                         @endforeach
@@ -55,11 +56,11 @@
                 </div>
 
                 {{-- Tanggal PO --}}
-                <div>
+                <div class="md:col-span-1">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
                         DATE (TANGGAL PO) <span class="text-red-500">*</span>
                     </label>
-                    <input type="date" name="tanggal_po" id="tanggal_po" value="{{ old('tanggal_po', date('Y-m-d')) }}" required
+                    <input type="date" name="tanggal_po" id="tanggal_po" value="{{ old('tanggal_po', \Carbon\Carbon::parse($po->tanggal_po)->format('Y-m-d')) }}" required
                         class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm font-semibold text-slate-800">
                 </div>
             </div>
@@ -70,10 +71,10 @@
                     <label class="block text-xs font-black uppercase tracking-wider text-slate-700">
                         SUPPLIER (Pemasok / Klien) <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="supplier_name" id="supplier_name" value="{{ old('supplier_name', 'PT CIPTA MARITIM PERKASA') }}" required placeholder="Nama Supplier..."
+                    <input type="text" name="supplier_name" id="supplier_name" value="{{ old('supplier_name', $po->supplier_name ?: 'PT CIPTA MARITIM PERKASA') }}" required placeholder="Nama Supplier..."
                         class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-sm text-slate-900 bg-white">
                     <textarea name="supplier_address" id="supplier_address" rows="2" placeholder="Alamat Supplier..."
-                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs text-slate-800 bg-white">{{ old('supplier_address', 'Ruko Tunas Regency Blok A5 No 09 – 10 Tanjung Uncang') }}</textarea>
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs text-slate-800 bg-white">{{ old('supplier_address', $po->supplier_address ?: 'Ruko Tunas Regency Blok A5 No 09 – 10 Tanjung Uncang') }}</textarea>
                 </div>
 
                 {{-- Box DELIVER TO --}}
@@ -81,41 +82,63 @@
                     <label class="block text-xs font-black uppercase tracking-wider text-slate-700">
                         DELIVER TO (Tujuan Pengiriman) <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="deliver_to_name" id="deliver_to_name" value="{{ old('deliver_to_name', 'PT TASNIEM GERAI INSPIRASI') }}" required
+                    <input type="text" name="deliver_to_name" id="deliver_to_name" value="{{ old('deliver_to_name', $po->deliver_to_name ?: 'PT TASNIEM GERAI INSPIRASI') }}" required
                         class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-sm text-slate-900 bg-white">
                     <textarea name="deliver_to_address" id="deliver_to_address" rows="2"
-                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs text-slate-800 bg-white">{{ old('deliver_to_address', 'Komp. Ruko KDA Junction Blok C 8-9') }}</textarea>
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs text-slate-800 bg-white">{{ old('deliver_to_address', $po->deliver_to_address ?: 'Komp. Ruko KDA Junction Blok C 8-9') }}</textarea>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">CURRENCY</label>
-                    <input type="text" name="currency" value="IDR" readonly class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100 font-bold text-xs text-center">
+                    <input type="text" name="currency" value="{{ old('currency', $po->currency ?: 'IDR') }}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-xs text-center">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">DELIVERY DATE</label>
-                    <input type="text" name="delivery_date" value="-" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-center">
+                    <input type="text" name="delivery_date" value="{{ old('delivery_date', $po->delivery_date ?: '-') }}" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-center">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">OFFER LETTER / REF</label>
-                    <input type="text" name="offer_letter" id="offer_letter" value="{{ old('offer_letter', $selectedOffer->no_surat ?? '') }}" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold">
+                    <input type="text" name="offer_letter" id="offer_letter" value="{{ old('offer_letter', $po->offer_letter ?: ($po->offer->no_surat ?? '')) }}" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">PAYMENT TERM</label>
-                    <input type="text" name="payment_term" value="BANK TRANSFER" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold">
+                    <input type="text" name="payment_term" value="{{ old('payment_term', $po->payment_term ?: 'BANK TRANSFER') }}" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">STATUS PO</label>
+                    <select name="status" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold bg-white text-slate-800">
+                        <option value="TERBIT" {{ old('status', $po->status) == 'TERBIT' ? 'selected' : '' }}>TERBIT</option>
+                        <option value="PROSES" {{ old('status', $po->status) == 'PROSES' ? 'selected' : '' }}>PROSES</option>
+                        <option value="SELESAI" {{ old('status', $po->status) == 'SELESAI' ? 'selected' : '' }}>SELESAI</option>
+                        <option value="BATAL" {{ old('status', $po->status) == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                    </select>
                 </div>
             </div>
 
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">JOB PROJECT</label>
-                <input type="text" name="job_project" id="job_project" value="{{ old('job_project', ($selectedOffer ? ($selectedOffer->project_no ?: $selectedOffer->no_surat) : '')) }}"
+                <input type="text" name="job_project" id="job_project" value="{{ old('job_project', $po->job_project ?: ($po->offer->project_no ?? ($po->offer->no_surat ?? ''))) }}"
                     placeholder="Sama dengan Quotation (Project No / No Surat)..."
                     class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800">
             </div>
 
-            <input type="hidden" name="nama_klien" id="nama_klien" value="{{ $selectedOffer->nama_klien ?? 'PT CIPTA MARITIM PERKASA' }}">
-            <input type="hidden" name="client_details" id="client_details" value="{{ $selectedOffer->client_details ?? '' }}">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">ISSUED BY</label>
+                    <input type="text" name="issued_by" value="{{ old('issued_by', $po->issued_by ?: 'Ardian Wijaya Kusuma') }}"
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">APPROVED BY</label>
+                    <input type="text" name="approved_by" value="{{ old('approved_by', $po->approved_by ?: 'Samsu Rizal') }}"
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800">
+                </div>
+            </div>
+
+            <input type="hidden" name="nama_klien" id="nama_klien" value="{{ old('nama_klien', $po->nama_klien) }}">
+            <input type="hidden" name="client_details" id="client_details" value="{{ old('client_details', $po->client_details) }}">
         </div>
 
         {{-- Card 2: Rincian Produk PO --}}
@@ -152,8 +175,8 @@
             <div class="flex justify-end pt-4 border-t border-slate-200">
                 <div class="w-full md:w-80 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-right">
                     <div class="text-xs font-bold text-slate-500 uppercase">Total Nilai PO:</div>
-                    <div class="text-2xl font-extrabold text-blue-700" id="txtGrandTotal">Rp 0</div>
-                    <input type="hidden" name="total_nilai" id="total_nilai" value="0">
+                    <div class="text-2xl font-extrabold text-blue-700" id="txtGrandTotal">Rp {{ number_format($po->total_nilai, 0, ',', '.') }}</div>
+                    <input type="hidden" name="total_nilai" id="total_nilai" value="{{ $po->total_nilai }}">
                 </div>
             </div>
         </div>
@@ -167,7 +190,7 @@
                 style="background-color: #2563eb !important; color: #ffffff !important;"
                 class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition shadow-xl shadow-blue-500/25 flex items-center gap-2 cursor-pointer">
                 <svg class="w-5 h-5 fill-current text-white" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                <span class="font-bold text-white tracking-wide">Simpan Data PO ke Histori</span>
+                <span class="font-bold text-white tracking-wide">Simpan Perubahan PO</span>
             </button>
         </div>
     </form>
@@ -175,7 +198,7 @@
 
 <script>
     const registeredProducts = @json($products);
-    const initialOfferItems = @json($selectedOffer ? $selectedOffer->items : []);
+    const initialPoItems = @json($po->items);
     let rowCounter = 0;
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -197,7 +220,7 @@
             let prodNameVal = initialData ? (initialData.nama_produk || '') : '';
             let packingVal = initialData ? (initialData.packing_size || '5 L') : '5 L';
             let qtyVal = initialData ? (initialData.qty_order || 1) : 1;
-            let priceVal = initialData ? (initialData.price_per_liter || initialData.harga_per_m2 || 0) : 0;
+            let priceVal = initialData ? (initialData.price_per_liter || 0) : 0;
             let consumptionVal = initialData ? (initialData.consumption_l || (getNumericPackingSize(packingVal) * qtyVal)) : 5;
 
             let prodOptions = `<option value="">-- Ketik Manual --</option>`;
@@ -332,9 +355,9 @@
 
         btnAddRow.addEventListener('click', () => createRow());
 
-        // Initialize rows
-        if (initialOfferItems && initialOfferItems.length > 0) {
-            initialOfferItems.forEach(item => createRow(item));
+        // Initialize existing PO rows
+        if (initialPoItems && initialPoItems.length > 0) {
+            initialPoItems.forEach(item => createRow(item));
         } else {
             createRow();
         }

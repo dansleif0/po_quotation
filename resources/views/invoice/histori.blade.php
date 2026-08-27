@@ -42,6 +42,7 @@
                         <th scope="col" class="px-6 py-3">No. Invoice</th>
                         <th scope="col" class="px-6 py-3">Nama Klien</th>
                         <th scope="col" class="px-6 py-3">No. Surat Penawaran</th>
+                        <th scope="col" class="px-6 py-3 text-center">File PO Client</th>
                         <th scope="col" class="px-6 py-3 text-right">Total Tagihan</th>
                         <th scope="col" class="px-6 py-3 text-center rounded-tr-lg">Action</th>
                     </tr>
@@ -79,6 +80,17 @@
                             @endif
                         </td>
 
+                        {{-- File PO Client --}}
+                        <td class="px-6 py-4 text-center whitespace-nowrap text-xs">
+                            @if($invoice->po_file_path)
+                                <a href="{{ asset('storage/' . $invoice->po_file_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 hover:bg-blue-100 transition shadow-sm">
+                                    <span>📄 File PO</span>
+                                </a>
+                            @else
+                                <span class="text-gray-400 italic">Belum ada</span>
+                            @endif
+                        </td>
+
                         <td class="px-6 py-4 text-right whitespace-nowrap font-bold text-green-600">
                             Rp {{ number_format($invoice->grand_total, 0, ',', '.') }}
                         </td>
@@ -94,9 +106,7 @@
                                     </svg>
                                 </button>
 
-                                {{-- Logika Posisi Dropdown: --}}
-                                {{-- Gunakan z-50 agar tampil paling depan --}}
-                                {{-- Jika ini 3 baris terakhir, dropdown muncul KE ATAS agar tidak tertutup footer --}}
+                                {{-- Logika Posisi Dropdown --}}
                                 <div x-show="open"
                                      x-cloak
                                      x-transition:enter="transition ease-out duration-100"
@@ -116,6 +126,15 @@
                                             </svg>
                                             Lihat Detail
                                         </a>
+
+                                        @if($invoice->po_file_path)
+                                        <a href="{{ asset('storage/' . $invoice->po_file_path) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 font-semibold" role="menuitem">
+                                            <svg class="mr-3 h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            File PO Client
+                                        </a>
+                                        @endif
 
                                         <a href="{{ route('invoice.edit', $invoice->id) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700" role="menuitem">
                                             <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
