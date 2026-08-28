@@ -23,7 +23,7 @@
                 <p class="text-xs text-blue-700">Berkas PO resmi dari klien tersedia untuk dilihat atau diunduh.</p>
             </div>
         </div>
-        <a href="{{ asset('storage/' . $invoice->po_file_path) }}" target="_blank"
+        <a href="{{ $invoice->po_file_url }}" target="_blank"
             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition shadow-sm inline-flex items-center gap-1.5 shrink-0">
             <span>📄 Lihat / Download File PO</span>
         </a>

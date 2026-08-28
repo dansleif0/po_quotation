@@ -30,6 +30,14 @@
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 text-sm" required>
                 </div>
 
+                {{-- Comp B (Span 2 / Optional) --}}
+                <div class="md:col-span-2">
+                    <label for="comp_b" class="block text-sm font-semibold text-gray-700">Comp B <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
+                    <input type="text" name="comp_b" id="comp_b" value="{{ old('comp_b') }}"
+                           placeholder="Contoh: Hardener Comp B / Standard Comp B (opsional)"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 text-sm">
+                </div>
+
                 {{-- Generic (Optional) --}}
                 <div>
                     <label for="generic" class="block text-sm font-semibold text-gray-700">Generic <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>

@@ -198,12 +198,19 @@
             let packingVal = initialData ? (initialData.packing_size || '5 L') : '5 L';
             let qtyVal = initialData ? (initialData.qty_order || 1) : 1;
             let priceVal = initialData ? (initialData.price_per_liter || initialData.harga_per_m2 || 0) : 0;
+
+            if (initialData && initialData.nama_produk) {
+                let foundProd = registeredProducts.find(p => p.nama_produk.toLowerCase() === initialData.nama_produk.toLowerCase());
+                if (foundProd && (foundProd.price_per_l || foundProd.harga)) {
+                    priceVal = Math.round(foundProd.price_per_l || foundProd.harga);
+                }
+            }
             let consumptionVal = initialData ? (initialData.consumption_l || (getNumericPackingSize(packingVal) * qtyVal)) : 5;
 
             let prodOptions = `<option value="">-- Ketik Manual --</option>`;
             registeredProducts.forEach(p => {
                 let isSel = (p.nama_produk.toLowerCase() === prodNameVal.toLowerCase()) ? 'selected' : '';
-                let basePrice = Math.round((p.price_per_l || p.harga || 0) * 1.40);
+                let basePrice = Math.round(p.price_per_l || p.harga || 0);
                 prodOptions += `<option value="${p.id}" data-nama="${p.nama_produk}" data-packing="${p.packing_size || '5 L'}" data-price="${basePrice}" ${isSel}>
                     ${p.nama_produk} (Rp ${parseInt(basePrice).toLocaleString('id-ID')}/L)
                 </option>`;

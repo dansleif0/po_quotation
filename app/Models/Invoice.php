@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Invoice extends Model
 {
@@ -23,5 +24,19 @@ class Invoice extends Model
     // Relasi ke Pembayaran DP
     public function payments() {
         return $this->hasMany(InvoicePayment::class);
+    }
+
+    // URL File PO (Penyimpanan Lokal Public)
+    public function getPoFileUrlAttribute()
+    {
+        if (!$this->po_file_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->po_file_path, 'http://') || str_starts_with($this->po_file_path, 'https://')) {
+            return $this->po_file_path;
+        }
+
+        return asset('storage/' . $this->po_file_path);
     }
 }

@@ -128,7 +128,7 @@
                     <span class="font-medium">Buat Quotation</span>
                 </a>
 
-                <div x-data="{ open: false }" class="mt-4">
+                <div x-data="{ open: {{ request()->routeIs('histori.*', 'po.*', 'invoice.*') ? 'true' : 'false' }} }" class="mt-4">
                     <button @click="open = !open" onclick="toggleSubmenu('histori-submenu', 'histori-icon')"
                         class="w-full flex items-center justify-between px-4 py-3 text-slate-300 hover:bg-slate-700/50 hover:text-white rounded-xl transition-all group focus:outline-none">
                         <div class="flex items-center">
@@ -139,18 +139,22 @@
                             </span>
                             <span class="font-medium">Histori Data</span>
                         </div>
-                        <svg id="histori-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg id="histori-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500 transition-transform duration-300 {{ request()->routeIs('histori.*', 'po.*', 'invoice.*') ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
 
-                    <div id="histori-submenu" class="submenu space-y-1">
-                        <a href="{{ route('histori.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic">
+                    <div id="histori-submenu" class="submenu space-y-1 {{ request()->routeIs('histori.*', 'po.*', 'invoice.*') ? 'open' : '' }}">
+                        <a href="{{ route('histori.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic {{ request()->routeIs('histori.*') ? 'text-white font-semibold' : '' }}">
                             <span class="mr-2 text-blue-500">•</span> Histori Quotation
                         </a>
 
-                        <a href="{{ route('po.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic">
+                        <a href="{{ route('po.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic {{ request()->routeIs('po.*') ? 'text-white font-semibold' : '' }}">
                             <span class="mr-2 text-emerald-500">•</span> Histori PO
+                        </a>
+
+                        <a href="{{ route('invoice.histori') }}" class="flex items-center px-4 py-2 text-sm text-slate-400 hover:text-white hover:translate-x-1 transition-transform italic {{ request()->routeIs('invoice.*') ? 'text-white font-semibold' : '' }}">
+                            <span class="mr-2 text-purple-500">•</span> Histori Invoice
                         </a>
                     </div>
                 </div>

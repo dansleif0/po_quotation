@@ -152,7 +152,12 @@
                     <tr class="bg-white hover:bg-gray-50 transition-colors">
                         {{-- Nama Produk --}}
                         <th scope="row" class="px-5 py-4 font-semibold text-gray-900 whitespace-nowrap">
-                            {{ $product->nama_produk }}
+                            <div>{{ $product->nama_produk }}</div>
+                            @if($product->comp_b)
+                                <div class="text-[11px] font-normal text-purple-700 bg-purple-50 inline-block px-1.5 py-0.5 rounded border border-purple-200 mt-1">
+                                    Comp B: {{ $product->comp_b }}
+                                </div>
+                            @endif
                         </th>
 
                         {{-- Generic --}}

@@ -16,6 +16,7 @@ class Product extends Model
      */
     protected $fillable = [
         'nama_produk',
+        'comp_b',
         'generic',
         'primer_topcoat',
         'category',
