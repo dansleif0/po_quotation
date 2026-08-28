@@ -53,12 +53,7 @@
                     <div class="border rounded-md mt-1 divide-y divide-gray-200 bg-gray-50">
                         @foreach($invoice->offer->items as $index => $item)
                         <div class="p-3 flex justify-between items-center text-sm">
-                            <span class="text-gray-700">
-                                @if($invoice->offer->opsi_paket)
-                                <span class="font-bold text-blue-600">Paket {{ chr(65 + $index) }}</span> - 
-                                @endif
-                                {{ $item->area_dinding }} ({{ $item->nama_produk }})
-                            </span>
+                                {{ $item->area_dinding ? $item->area_dinding . ' (' . $item->nama_produk . ')' : $item->nama_produk }}
                             <span class="font-medium">Rp {{ number_format($item->volume * $item->harga_per_m2, 0, ',', '.') }}</span>
                         </div>
                         @endforeach

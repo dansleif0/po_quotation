@@ -58,16 +58,16 @@
 
                     <div class="flex items-start mb-3">
                         <div class="flex items-center h-5">
-                            <input name="pisah_kriteria_total" type="checkbox" value="1" class="h-4 w-4 text-blue-600 border-gray-300 rounded" {{ $offer->pisah_kriteria_total ? 'checked' : '' }}>
+                            <input id="tampilkan_comp_b" name="tampilkan_comp_b" type="checkbox" value="1" class="h-4 w-4 text-blue-600 border-gray-300 rounded cursor-pointer" {{ !empty($offer->tampilkan_comp_b) ? 'checked' : '' }}>
                         </div>
-                        <div class="ml-3 text-sm"><label class="font-medium text-gray-700">Pisahkan Kriteria Total</label></div>
+                        <div class="ml-3 text-sm"><label for="tampilkan_comp_b" class="font-medium text-gray-700 cursor-pointer">Tampilkan Comp B</label></div>
                     </div>
 
                     <div class="flex items-start">
                         <div class="flex items-center h-5">
-                            <input name="hilangkan_grand_total" type="checkbox" value="1" class="h-4 w-4 text-blue-600 border-gray-300 rounded" {{ $offer->hilangkan_grand_total ? 'checked' : '' }}>
+                            <input id="hilangkan_grand_total" name="hilangkan_grand_total" type="checkbox" value="1" class="h-4 w-4 text-blue-600 border-gray-300 rounded cursor-pointer" {{ $offer->hilangkan_grand_total ? 'checked' : '' }}>
                         </div>
-                        <div class="ml-3 text-sm"><label class="font-medium text-gray-700">Hilangkan Grand Total</label></div>
+                        <div class="ml-3 text-sm"><label for="hilangkan_grand_total" class="font-medium text-gray-700 cursor-pointer">Sembunyikan Grand Total</label></div>
                     </div>
                 </div>
 

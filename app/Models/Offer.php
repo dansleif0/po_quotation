@@ -29,6 +29,7 @@ class Offer extends Model
         'pisah_kriteria_total',
         'hilangkan_grand_total',
         'opsi_paket',
+        'tampilkan_comp_b',
         'jenis_penawaran',
         'total_keseluruhan',
     ];

@@ -177,10 +177,16 @@
                         $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
                         $rowTotal = $consumption * $priceL;
                         $sumTotal += $rowTotal;
+                        $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
                     @endphp
                     <tr>
                         <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $idx + 1 }}</td>
-                        <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">{{ $item->nama_produk }}</td>
+                        <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">
+                            <div>{{ $item->nama_produk }}</div>
+                            @if($offer->tampilkan_comp_b && !empty($compB))
+                                <div class="text-[10px] font-normal text-gray-700 normal-case mt-0.5">Comp B: {{ $compB }}</div>
+                            @endif
+                        </td>
                         <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
                         <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
                         <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>

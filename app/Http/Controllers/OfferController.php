@@ -90,6 +90,8 @@ class OfferController extends Controller
                 'jenis_penawaran'     => 'produk',
                 'diskon_global'       => $diskonGlobal,
                 'total_keseluruhan'   => $finalTotal,
+                'tampilkan_comp_b'    => $request->has('tampilkan_comp_b') ? 1 : 0,
+                'hilangkan_grand_total' => $request->has('hilangkan_grand_total') ? 1 : 0,
             ]);
 
             if ($request->has('items')) {
@@ -104,9 +106,12 @@ class OfferController extends Controller
                     $consumption = (float)($itemData['consumption_l'] ?? 0);
                     $qtyOrder = (float)($itemData['qty_order'] ?? 0);
 
+                    $prod = !empty($itemData['product_id']) ? Product::find($itemData['product_id']) : Product::where('nama_produk', $itemData['nama_produk'])->first();
+
                     $offer->items()->create([
-                        'product_id'           => $itemData['product_id'] ?? null,
+                        'product_id'           => $itemData['product_id'] ?? $prod?->id,
                         'nama_produk'          => $itemData['nama_produk'],
+                        'comp_b'               => $prod?->comp_b,
                         'packing_size'         => $itemData['packing_size'] ?? '',
                         'qty_order'            => $qtyOrder,
                         'consumption_l'        => $consumption,
@@ -159,9 +164,8 @@ class OfferController extends Controller
                 'client_details'        => $request->client_details,
                 'perihal'               => $request->perihal ?? 'Penawaran Jasa Apply dan Supply Pengecatan',
                 'total_keseluruhan'     => $totalProduk + $totalJasa,
-                'pisah_kriteria_total'  => $request->has('pisah_kriteria_total') ? 1 : 0,
+                'tampilkan_comp_b'      => $request->has('tampilkan_comp_b') ? 1 : 0,
                 'hilangkan_grand_total' => $request->has('hilangkan_grand_total') ? 1 : 0,
-                'opsi_paket'            => $request->has('opsi_paket') ? 1 : 0,
                 'jenis_penawaran'       => $offer->jenis_penawaran ?? 'jasa',
             ];
 
@@ -183,8 +187,11 @@ class OfferController extends Controller
             if ($request->has('produk')) {
                 foreach ($request->produk as $pData) {
                     if (!empty($pData['nama'])) {
+                        $prod = Product::where('nama_produk', $pData['nama'])->first();
                         $targetOffer->items()->create([
+                            'product_id'   => $prod?->id,
                             'nama_produk'  => $pData['nama'],
+                            'comp_b'       => $prod?->comp_b,
                             'area_dinding' => $pData['area'] ?? '',
                             'volume'       => (float)($pData['volume'] ?? 0),
                             'harga_per_m2' => (float)($pData['harga'] ?? 0),

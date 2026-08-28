@@ -199,21 +199,15 @@
                 <div class="w-full md:w-1/2 space-y-3 bg-gray-50 p-4 rounded-lg">
                     <h3 class="font-bold text-gray-700 text-sm mb-2">Pengaturan Dokumen</h3>
                     <div class="flex items-center">
-                        <input id="pisah_kriteria_total" name="pisah_kriteria_total" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" {{ $offer->pisah_kriteria_total ? 'checked' : '' }}>
-                        <label for="pisah_kriteria_total" class="ml-2 block text-sm text-gray-700">
-                            Pisahkan Total (Interior/Exterior)
+                        <input id="tampilkan_comp_b" name="tampilkan_comp_b" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer" {{ !empty($offer->tampilkan_comp_b) ? 'checked' : '' }}>
+                        <label for="tampilkan_comp_b" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                            Tampilkan Comp B
                         </label>
                     </div>
                     <div class="flex items-center">
                         <input id="hilangkan_grand_total" name="hilangkan_grand_total" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" {{ $offer->hilangkan_grand_total ? 'checked' : '' }}>
                         <label for="hilangkan_grand_total" class="ml-2 block text-sm text-gray-700">
                             Sembunyikan Grand Total
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <input id="opsi_paket" name="opsi_paket" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer" {{ $offer->opsi_paket ? 'checked' : '' }}>
-                        <label for="opsi_paket" class="ml-2 block text-sm text-gray-700 cursor-pointer">
-                            Buat Opsi Paket
                         </label>
                     </div>
                 </div>

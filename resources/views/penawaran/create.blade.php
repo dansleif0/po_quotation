@@ -177,7 +177,23 @@
             </div>
 
             {{-- Summary & Diskon --}}
-            <div class="mt-8 pt-6 border-t border-slate-200/80 flex flex-col md:flex-row justify-end items-end gap-6">
+            <div class="mt-8 pt-6 border-t border-slate-200/80 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                <div class="w-full md:w-80 space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200/60">
+                    <h3 class="font-bold text-slate-700 text-sm mb-2">Pengaturan Dokumen</h3>
+                    <div class="flex items-center">
+                        <input id="tampilkan_comp_b" name="tampilkan_comp_b" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer">
+                        <label for="tampilkan_comp_b" class="ml-2 block text-sm text-slate-700 cursor-pointer">
+                            Tampilkan Comp B
+                        </label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="hilangkan_grand_total" name="hilangkan_grand_total" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer">
+                        <label for="hilangkan_grand_total" class="ml-2 block text-sm text-slate-700 cursor-pointer">
+                            Sembunyikan Grand Total
+                        </label>
+                    </div>
+                </div>
+
                 <div class="w-full md:w-80 space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200/60">
                     <div class="flex justify-between items-center text-sm font-semibold text-slate-600">
                         <span>Subtotal Keseluruhan:</span>

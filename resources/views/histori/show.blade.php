@@ -61,156 +61,52 @@
 
         {{-- PHP LOGIC --}}
         @php
-        $isSplit = $offer->pisah_kriteria_total;
         $showTotal = !$offer->hilangkan_grand_total;
-
-        // Hitung Total Jasa
         $totalJasa = $offer->jasaItems->sum('harga_jasa');
-
-        $exteriorItems = collect();
-        $interiorItems = collect();
-        $totalExterior = 0;
-        $totalInterior = 0;
-
-        if ($isSplit) {
-        $exteriorItems = $offer->items->filter(function($item) {
-        $prod = \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
-        return $prod && $prod->kriteria == 'Exterior';
-        });
-        $totalExterior = $exteriorItems->sum(function($item) { return $item->volume * $item->harga_per_m2; });
-
-        $interiorItems = $offer->items->filter(function($item) {
-        $prod = \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
-        return !$prod || $prod->kriteria != 'Exterior';
-        });
-        $totalInterior = $interiorItems->sum(function($item) { return $item->volume * $item->harga_per_m2; });
-        }
-        $globalIndex = 0;
         @endphp
 
         <section class="mt-8">
             <div class="w-full overflow-x-auto">
 
-                {{-- KASUS 1: SPLIT --}}
-                @if($isSplit)
-
-                {{-- EXTERIOR --}}
-                @if($exteriorItems->isNotEmpty())
-                <div class="mb-8 page-break-inside-avoid">
-                    <h4 class="font-bold text-gray-800 mb-2 uppercase border-b-2 border-gray-800 inline-block text-sm">Pekerjaan Exterior</h4>
-                    <table class="w-full text-left border-collapse mb-4">
-                        <thead class="bg-gray-800 text-white">
-                            <tr>
-                                @if($offer->opsi_paket)
-                                <th class="py-2 px-2 font-semibold uppercase text-xs w-[12%] whitespace-nowrap align-middle">Opsi Paket</th>
+                @if($offer->items->isNotEmpty())
+                @if($offer->jenis_penawaran == 'proyek')
+                {{-- TABEL QUOTATION PROYEK --}}
+                <table class="w-full text-left border-collapse page-break-inside-avoid text-xs mb-4">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs w-8">No</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs">Area Pekerjaan</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs">Produk</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs text-right">Volume</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs text-right">Harga Satuan</th>
+                            <th class="py-2.5 px-2 font-semibold uppercase text-xs text-right">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        @foreach($offer->items as $index => $item)
+                        @php
+                            $subtotal = $item->volume * $item->harga_per_m2;
+                            $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
+                        @endphp
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 px-2 text-gray-600 align-middle text-center">{{ $index + 1 }}</td>
+                            <td class="py-2 px-2 text-gray-700 align-middle">{{ $item->area_dinding ?: '-' }}</td>
+                            <td class="py-2 px-2 text-gray-900 font-bold align-middle">
+                                <div>{{ $item->nama_produk }}</div>
+                                @if($offer->tampilkan_comp_b && !empty($compB))
+                                    <div class="text-[11px] font-normal text-blue-600 mt-0.5">Comp B: {{ $compB }}</div>
                                 @endif
-                                <th class="py-2 px-2 font-semibold uppercase text-xs w-[28%] whitespace-nowrap align-middle">Area Pekerjaan</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs w-[12%] whitespace-nowrap align-middle">Nama Brand</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs w-[20%] whitespace-nowrap align-middle">Produk</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[10%] whitespace-nowrap align-middle">Volume/M²</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[15%] whitespace-nowrap align-middle">Harga Satuan</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[15%] whitespace-nowrap align-middle">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($exteriorItems as $item)
-                            <tr class="border-b border-gray-500">
-                                @if($offer->opsi_paket)
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">Paket {{ chr(65 + $globalIndex) }}</td>
-                                @php $globalIndex++; @endphp
-                                @endif
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->area_dinding }}</td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">
-                                    @php $p = \App\Models\Product::where('nama_produk', $item->nama_produk)->first(); @endphp
-                                    {{ $p->performa ?? '-' }}
-                                </td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->nama_produk }}</td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none text-right whitespace-nowrap align-middle">{{ $item->volume }}</td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->harga_per_m2, 0, ',', '.') }}</span></div>
-                                </td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap font-medium align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->volume * $item->harga_per_m2, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                        @if($showTotal)
-                        <tfoot>
-                            <tr class="bg-gray-100 font-bold text-gray-800">
-                                <td colspan="{{ $offer->opsi_paket ? 4 : 3 }}" class="py-1 px-1 text-xs text-right uppercase align-middle">Total Exterior</td>
-                                <td class="py-1 px-1 text-xs text-right align-middle">{{ $exteriorItems->sum('volume') + 0 }}</td>
-                                <td class="py-1 px-1 text-xs align-middle"></td>
-                                <td class="py-1 px-1 text-xs text-right whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($totalExterior, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                        </tfoot>
-                        @endif
-                    </table>
-                </div>
-                @endif
-
-                {{-- INTERIOR --}}
-                @if($interiorItems->isNotEmpty())
-                <div class="mb-8 page-break-inside-avoid">
-                    <h4 class="font-bold text-gray-800 mb-2 uppercase border-b-2 border-gray-800 inline-block text-sm">Pekerjaan Interior</h4>
-                    <table class="w-full text-left border-collapse mb-4">
-                        <thead class="bg-gray-800 text-white">
-                            <tr>
-                                @if($offer->opsi_paket)
-                                <th class="py-2 px-2 font-semibold uppercase text-xs w-[12%] whitespace-nowrap align-middle">Opsi Paket</th>
-                                @endif
-                                <th class="py-2 px-2 font-semibold uppercase text-xs w-[28%] whitespace-nowrap align-middle">Area Pekerjaan</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs w-[12%] whitespace-nowrap align-middle">Nama Brand</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs w-[20%] whitespace-nowrap align-middle">Produk</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[10%] whitespace-nowrap align-middle">Volume/M²</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[15%] whitespace-nowrap align-middle">Harga Satuan</th>
-                                <th class="py-2 px-2 font-semibold uppercase text-xs text-right w-[15%] whitespace-nowrap align-middle">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($interiorItems as $item)
-                            <tr class="border-b border-gray-500">
-                                @if($offer->opsi_paket)
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">Paket {{ chr(65 + $globalIndex) }}</td>
-                                @php $globalIndex++; @endphp
-                                @endif
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->area_dinding }}</td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">
-                                    @php $p = \App\Models\Product::where('nama_produk', $item->nama_produk)->first(); @endphp
-                                    {{ $p->performa ?? '-' }}
-                                </td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">{{ $item->nama_produk }}</td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none text-right whitespace-nowrap align-middle">{{ $item->volume }}</td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->harga_per_m2, 0, ',', '.') }}</span></div>
-                                </td>
-                                <td class="py-1 px-2 text-xs text-gray-700 leading-none whitespace-nowrap font-medium align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($item->volume * $item->harga_per_m2, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                        @if($showTotal)
-                        <tfoot>
-                            <tr class="bg-gray-100 font-bold text-gray-800">
-                                <td colspan="{{ $offer->opsi_paket ? 4 : 3 }}" class="py-1 px-1 text-xs text-right uppercase align-middle">Total Interior</td>
-                                <td class="py-1 px-1 text-xs text-right align-middle">{{ $interiorItems->sum('volume') + 0 }}</td>
-                                <td class="py-1 px-1 text-xs align-middle"></td>
-                                <td class="py-1 px-1 text-xs text-right whitespace-nowrap align-middle">
-                                    <div class="flex justify-end gap-1 w-full"><span>Rp</span><span>{{ number_format($totalInterior, 0, ',', '.') }}</span></div>
-                                </td>
-                            </tr>
-                        </tfoot>
-                        @endif
-                    </table>
-                </div>
-                @endif
-
-                {{-- KASUS 2: QUOTATION PRODUCTS TABLE --}}
+                            </td>
+                            <td class="py-2 px-2 text-gray-700 text-right align-middle">{{ $item->volume }}</td>
+                            <td class="py-2 px-2 text-gray-700 text-right align-middle">Rp {{ number_format($item->harga_per_m2, 0, ',', '.') }}</td>
+                            <td class="py-2 px-2 text-gray-900 font-extrabold text-right align-middle">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
                 @else
-                <table class="w-full text-left border-collapse page-break-inside-avoid text-xs">
+                {{-- TABEL QUOTATION PRODUK --}}
+                <table class="w-full text-left border-collapse page-break-inside-avoid text-xs mb-4">
                     <thead class="bg-gray-800 text-white">
                         <tr>
                             <th class="py-2.5 px-2 font-semibold uppercase text-xs w-8">No</th>
@@ -230,10 +126,16 @@
                             $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
                             $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
                             $subtotal = $consumption * $priceL;
+                            $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
                         @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="py-2 px-2 text-gray-600 align-middle text-center">{{ $index + 1 }}</td>
-                            <td class="py-2 px-2 text-gray-900 font-bold align-middle">{{ $item->nama_produk }}</td>
+                            <td class="py-2 px-2 text-gray-900 font-bold align-middle">
+                                <div>{{ $item->nama_produk }}</div>
+                                @if($offer->tampilkan_comp_b && !empty($compB))
+                                    <div class="text-[11px] font-normal text-blue-600 mt-0.5">Comp B: {{ $compB }}</div>
+                                @endif
+                            </td>
                             <td class="py-2 px-2 text-gray-700 align-middle">{{ $item->packing_size ?: '-' }}</td>
                             <td class="py-2 px-2 text-gray-700 text-right align-middle font-semibold">{{ $qty + 0 }}</td>
                             <td class="py-2 px-2 text-gray-700 text-right font-bold align-middle text-blue-700">{{ $consumption + 0 }} L</td>
@@ -248,6 +150,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                @endif
                 @endif
 
                 {{-- TABEL JASA (DENGAN TOTAL) --}}

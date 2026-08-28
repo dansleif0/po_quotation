@@ -50,7 +50,7 @@ class ProductOfferController extends Controller
                 'perihal'               => $request->perihal ?? 'Penawaran supply produk cat Jotun',
                 'created_at'            => $request->tanggal,
                 'jenis_penawaran'       => 'produk',
-                'pisah_kriteria_total'  => $request->has('pisah_kriteria_total'),
+                'tampilkan_comp_b'      => $request->has('tampilkan_comp_b'),
                 'hilangkan_grand_total' => $request->has('hilangkan_grand_total'),
                 'diskon_global'         => $request->diskon_global ?? 0,
                 'total_keseluruhan'     => 0,
@@ -75,9 +75,13 @@ class ProductOfferController extends Controller
 
                 $grandTotal += $subtotalBaris;
 
+                $prod = Product::where('nama_produk', $namaProduk)->first();
+
                 OfferItem::create([
                     'offer_id'           => $offer->id,
+                    'product_id'         => $prod?->id,
                     'nama_produk'        => $namaProduk, // Simpan string inputan user
+                    'comp_b'             => $prod?->comp_b,
                     'harga_per_m2'       => $hargaSatuan,
                     'volume'             => $qty,
                     'area_dinding'       => $ukuran,
@@ -132,7 +136,7 @@ class ProductOfferController extends Controller
                 'client_details'        => $request->client_details,
                 'perihal'               => $request->perihal ?? 'Penawaran supply produk cat Jotun',
                 'created_at'            => $request->tanggal, // Bisa update tanggal juga
-                'pisah_kriteria_total'  => $request->has('pisah_kriteria_total'),
+                'tampilkan_comp_b'      => $request->has('tampilkan_comp_b'),
                 'hilangkan_grand_total' => $request->has('hilangkan_grand_total'),
                 'diskon_global'         => $request->diskon_global ?? 0,
                 // total_keseluruhan dihitung ulang di bawah
@@ -157,9 +161,13 @@ class ProductOfferController extends Controller
 
                 $grandTotal += $subtotalBaris;
 
+                $prod = Product::where('nama_produk', $namaProduk)->first();
+
                 OfferItem::create([
                     'offer_id'           => $offer->id,
+                    'product_id'         => $prod?->id,
                     'nama_produk'        => $namaProduk,
+                    'comp_b'             => $prod?->comp_b,
                     'harga_per_m2'       => $hargaSatuan,
                     'volume'             => $qty,
                     'area_dinding'       => $ukuran,

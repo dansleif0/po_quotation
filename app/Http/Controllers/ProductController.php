@@ -296,9 +296,8 @@ class ProductController extends Controller
                 'client_details'        => $request->client_details,
                 'perihal'               => $request->perihal ?? 'Penawaran Jasa Apply dan Supply Pengecatan',
                 'total_keseluruhan'     => $totalProduk + $totalJasa,
-                'pisah_kriteria_total'  => $request->has('pisah_kriteria_total') ? 1 : 0,
+                'tampilkan_comp_b'      => $request->has('tampilkan_comp_b') ? 1 : 0,
                 'hilangkan_grand_total' => $request->has('hilangkan_grand_total') ? 1 : 0,
-                'opsi_paket'            => $request->has('opsi_paket') ? 1 : 0,
                 'jenis_penawaran'       => 'proyek', // Tambahkan penanda jenis jika perlu
             ]);
 
@@ -306,9 +305,12 @@ class ProductController extends Controller
             if ($request->has('produk')) {
                 foreach ($request->produk as $itemData) {
                     if (!empty($itemData['nama'])) {
+                        $prod = Product::where('nama_produk', $itemData['nama'])->first();
                         $offer->items()->create([
+                            'product_id'   => $prod?->id,
                             'nama_produk'  => $itemData['nama'],
-                            'area_dinding' => $itemData['area'],
+                            'comp_b'       => $prod?->comp_b,
+                            'area_dinding' => $itemData['area'] ?? '',
                             'volume'       => $itemData['volume'] ?? 0,
                             'harga_per_m2' => $itemData['harga'] ?? 0,
                         ]);
