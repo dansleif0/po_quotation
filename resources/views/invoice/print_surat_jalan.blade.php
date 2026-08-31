@@ -5,12 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Surat Jalan - {{ $invoice->no_invoice }}</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         @media print {
             @page {
-                size: A4;
-                margin: 12.7mm;
+                size: A4 landscape;
+                margin: 8mm;
             }
 
             body {
@@ -28,19 +30,9 @@
             #main-container {
                 width: 100% !important;
                 margin: 0 auto !important;
-                padding: 12.7mm !important;
+                padding: 8mm !important;
                 box-shadow: none !important;
                 border: none !important;
-            }
-
-            table {
-                page-break-inside: auto;
-                width: 100%;
-            }
-
-            tr {
-                page-break-inside: avoid;
-                page-break-after: auto;
             }
         }
 
@@ -50,10 +42,10 @@
 
         #main-container {
             background-color: white;
-            width: 210mm;
-            min-height: 297mm;
+            width: 275mm;
+            min-height: 180mm;
             margin: 20px auto;
-            padding: 12.7mm;
+            padding: 12mm;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
@@ -79,110 +71,205 @@
         </button>
     </div>
 
-    <div id="main-container" class="max-w-[21cm] mx-auto bg-white shadow-xl my-10 p-10 print:shadow-none print:my-0">
+    <div id="main-container" class="bg-white text-black font-sans text-[11px]">
 
-        {{-- HEADER KOP SURAT --}}
-        <header class="w-full mb-6">
-            <div class="w-full">
-                <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat" class="w-full h-auto">
+        {{-- HEADER SECTION --}}
+        <div class="flex justify-between items-start pb-1 gap-2">
+            {{-- Left Header: Company Name, Address & Nomor/Tanggal --}}
+            <div class="w-5/12 leading-snug text-black">
+                <h2 class="font-extrabold text-sm text-black tracking-tight">PT. TASNIEM GERAI INSPIRASI</h2>
+                <p>Komp.Ruko KDA Junction Blok C 8-9</p>
+                <p>Batam Centre</p>
+                <div class="mt-2 space-y-0.5">
+                    <div class="flex">
+                        <span class="w-20 font-bold uppercase">NOMOR</span>
+                        <span>: {{ $invoice->no_invoice }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-20 font-bold uppercase">TANGGAL</span>
+                        <span>: {{ \Carbon\Carbon::parse($invoice->created_at)->format('d F Y') }}</span>
+                    </div>
+                </div>
             </div>
-            <div class="w-full border-b-[4px] border-[#d32f2f] mt-1"></div>
-        </header>
 
-        {{-- JUDUL SURAT JALAN --}}
-        <div class="text-center my-6">
-            <h1 class="text-2xl font-extrabold tracking-wider uppercase underline">SURAT JALAN</h1>
-            <p class="text-sm font-semibold text-gray-700 mt-1">No. SJ: SJ-{{ $invoice->no_invoice }}</p>
+            {{-- Center Header: Title SURAT JALAN --}}
+            <div class="w-3/12 text-center pt-2">
+                <h1 class="text-xl font-extrabold tracking-wider uppercase underline">SURAT JALAN</h1>
+            </div>
+
+            {{-- Right Header: Kepada, Telp, Fax, Sales --}}
+            <div class="w-4/12 flex flex-col items-end">
+                <div class="w-full max-w-[280px] space-y-0.5 text-[11px]">
+                    <div class="flex items-start">
+                        <span class="w-16 font-bold shrink-0">Kepada</span>
+                        <div class="font-bold text-black uppercase leading-tight">
+                            : {{ strtoupper($invoice->nama_klien) }}
+                            @if($invoice->offer && $invoice->offer->client_details)
+                            <div class="font-normal text-[11px] text-gray-800 uppercase leading-tight mt-0.5">{{ $invoice->offer->client_details }}</div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-16 font-bold shrink-0">Telp.</span>
+                        <span>: -</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-16 font-bold shrink-0">Fax</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-16 font-bold shrink-0">Sales</span>
+                        <span class="font-bold">: YASRI</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <section class="mt-6 flex justify-between text-sm">
-            <div class="w-1/2">
-                <p class="font-bold mb-1">KEPADA YTH:</p>
-                <p class="font-bold text-base uppercase">{{ $invoice->nama_klien }}</p>
-                @if($invoice->offer && $invoice->offer->client_details)
-                <p class="text-gray-700 whitespace-pre-line">{{ $invoice->offer->client_details }}</p>
-                @endif
-            </div>
-            <div class="w-1/2 text-right">
-                <div class="flex justify-end mb-1">
-                    <span class="w-28 text-left font-bold">Tanggal Kirim</span>
-                    <span class="text-left">: {{ \Carbon\Carbon::parse($invoice->created_at)->format('d F Y') }}</span>
-                </div>
-                <div class="flex justify-end">
-                    <span class="w-28 text-left font-bold">Ref Invoice</span>
-                    <span class="text-left">: {{ $invoice->no_invoice }}</span>
-                </div>
-            </div>
-        </section>
-
-        <section class="mt-8 text-sm">
-            <p class="mb-2">Mohon diterima barang-barang tersebut di bawah ini dengan kondisi baik dan cukup:</p>
-
-            <table class="w-full mt-4 border-collapse border border-black">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="border border-black p-2 text-center w-12 font-semibold">No.</th>
-                        <th class="border border-black p-2 text-left font-semibold">Nama Barang / Deskripsi Pekerjaan</th>
-                        <th class="border border-black p-2 text-center w-28 font-semibold">Packing</th>
-                        <th class="border border-black p-2 text-center w-24 font-semibold">Qty</th>
+        {{-- MAIN TABLE (Tighter py-0.5) --}}
+        <div class="my-1.5">
+            <table class="w-full text-[11px] border-collapse">
+                <thead>
+                    <tr class="border-t border-b border-black font-bold text-black uppercase">
+                        <th class="py-0.5 px-1 text-center w-8">NO</th>
+                        <th class="py-0.5 px-2 text-left">NAMA BARANG</th>
+                        <th class="py-0.5 px-2 text-center w-24">JUMLAH</th>
+                        <th class="py-0.5 px-2 text-center w-16">BONUS</th>
+                        <th class="py-0.5 px-2 text-center w-32">KETERANGAN</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     @php $rowCounter = 1; @endphp
-                    @if($invoice->offer && $invoice->offer->items->isNotEmpty())
+                    @if(!empty($invoice->tampilkan_comp_b) && $invoice->offer && $invoice->offer->items->isNotEmpty())
                         @foreach($invoice->offer->items as $item)
-                            <tr>
-                                <td class="border border-black p-2 text-center">{{ $rowCounter++ }}</td>
-                                <td class="border border-black p-2 font-bold">{{ $item->nama_produk }}</td>
-                                <td class="border border-black p-2 text-center">{{ $item->packing_size ?? '-' }}</td>
-                                <td class="border border-black p-2 text-center font-bold">{{ $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1) }}</td>
+                            @php
+                                $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
+                                $packing = $item->packing_size ?? '';
+                                $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
+
+                                $namaCompA = $item->nama_produk;
+                                if ($compB && !str_contains(strtoupper($namaCompA), 'CPA')) {
+                                    $namaCompA .= ' CPA';
+                                }
+                                $namaCompB = $compB;
+                                if ($compB && !str_contains(strtoupper($namaCompB), 'CPB')) {
+                                    $namaCompB .= ' CPB';
+                                }
+                            @endphp
+
+                            @if(!empty($compB))
+                                {{-- Row 1: Comp A --}}
+                                <tr class="align-top">
+                                    <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-0.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($namaCompA) }}</span>
+                                            <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-0.5 px-2 text-center"></td>
+                                    <td class="py-0.5 px-2 text-center"></td>
+                                </tr>
+                                {{-- Row 2: Comp B --}}
+                                <tr class="align-top">
+                                    <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-0.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($namaCompB) }}</span>
+                                            <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-0.5 px-2 text-center"></td>
+                                    <td class="py-0.5 px-2 text-center"></td>
+                                </tr>
+                            @else
+                                <tr class="align-top">
+                                    <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-0.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($item->nama_produk) }}</span>
+                                            <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-0.5 px-2 text-center"></td>
+                                    <td class="py-0.5 px-2 text-center"></td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    @elseif($invoice->offer && $invoice->offer->items->isNotEmpty())
+                        @foreach($invoice->offer->items as $item)
+                            @php
+                                $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
+                                $packing = $item->packing_size ?? '';
+                            @endphp
+                            <tr class="align-top">
+                                <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                <td class="py-0.5 px-2">
+                                    <div class="flex justify-between items-center font-bold">
+                                        <span>{{ strtoupper($item->nama_produk) }}</span>
+                                        <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                <td class="py-0.5 px-2 text-center"></td>
+                                <td class="py-0.5 px-2 text-center"></td>
                             </tr>
                         @endforeach
                     @else
-                        <tr>
-                            <td class="border border-black p-2 text-center">1</td>
-                            <td class="border border-black p-2 font-bold">{{ optional($invoice->offer)->perihal ?? 'Pengiriman Supply Produk Cat Jotun' }}</td>
-                            <td class="border border-black p-2 text-center">-</td>
-                            <td class="border border-black p-2 text-center font-bold">1 Paket</td>
+                        <tr class="align-top">
+                            <td class="py-0.5 px-1 text-center font-semibold">1.</td>
+                            <td class="py-0.5 px-2 font-bold">{{ strtoupper(optional($invoice->offer)->perihal ?? 'Pengiriman Supply Cat Jotun') }}</td>
+                            <td class="py-0.5 px-2 text-center font-semibold">1 PAKET</td>
+                            <td class="py-0.5 px-2 text-center"></td>
+                            <td class="py-0.5 px-2 text-center"></td>
                         </tr>
                     @endif
 
                     @foreach($invoice->additions as $addition)
-                    <tr>
-                        <td class="border border-black p-2 text-center">{{ $rowCounter++ }}</td>
-                        <td class="border border-black p-2">{{ $addition->nama_pekerjaan }}</td>
-                        <td class="border border-black p-2 text-center">-</td>
-                        <td class="border border-black p-2 text-center font-bold">1 Pekerjaan</td>
+                    <tr class="align-top">
+                        <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                        <td class="py-0.5 px-2 font-bold">{{ strtoupper($addition->nama_pekerjaan) }}</td>
+                        <td class="py-0.5 px-2 text-center font-semibold">1 Ls</td>
+                        <td class="py-0.5 px-2 text-center"></td>
+                        <td class="py-0.5 px-2 text-center"></td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
-        </section>
+            <div class="border-b border-black w-full mt-0.5"></div>
+        </div>
 
-        {{-- TANDA TANGAN PENERIMA & PENGIRIM --}}
-        <section class="mt-16 grid grid-cols-3 text-center text-sm gap-4">
+        {{-- NOTES & PRINTED BY SECTION --}}
+        <div class="my-3 text-[11px] font-sans space-y-0.5">
             <div>
-                <p class="font-semibold">Tanda Terima,</p>
-                <div class="h-24"></div>
-                <p class="font-bold border-b border-black inline-block px-8">( &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )</p>
-                <p class="text-xs text-gray-500 mt-1">Nama Clear & Stempel</p>
+                <span class="font-bold">Catatan :</span> {{ strtoupper($invoice->nama_klien) }} {{ $invoice->offer && $invoice->offer->client_details ? '- ' . strtoupper($invoice->offer->client_details) : '' }}
             </div>
-            <div>
-                <p class="font-semibold">Sopir / Kurir,</p>
-                <div class="h-24"></div>
-                <p class="font-bold border-b border-black inline-block px-8">( &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )</p>
-                <p class="text-xs text-gray-500 mt-1">Pengirim</p>
+            <div class="text-[10px] text-black pt-0.5">
+                <span class="font-bold">Printed By :</span> Admin, {{ date('H:i:s, l, d F Y') }}
             </div>
-            <div>
-                <p class="font-semibold">Hormat Kami,</p>
-                <p class="font-bold">PT. Tasniem Gerai Inspirasi</p>
-                <div class="h-24 relative flex items-center justify-center">
-                    <img src="{{ asset('images/ttd.png') }}" alt="Tanda Tangan" class="h-20 opacity-90 mx-auto">
-                </div>
-                <p class="font-bold text-gray-800">SAMSU RIZAL</p>
-                <p class="text-xs text-gray-600">General Manager</p>
+        </div>
+
+        {{-- SIGNATURE SECTION (4 Columns: Bag. Administrasi, Kepala Gudang, Supir/Helper, Yang Menerima) --}}
+        <div class="mt-20 grid grid-cols-4 text-center text-[11px] font-sans gap-8">
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Bag. Administrasi,</p>
+                <div class="border-b border-black w-full"></div>
             </div>
-        </section>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Kepala Gudang,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Supir/Helper,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Yang Menerima,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+        </div>
 
     </div>
 

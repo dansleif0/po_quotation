@@ -106,6 +106,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/print', [InvoiceController::class, 'print'])->name('print');
         Route::get('/{id}/print-surat-jalan', [InvoiceController::class, 'printSuratJalan'])->name('print_surat_jalan');
+        Route::get('/{id}/print-both', [InvoiceController::class, 'printBoth'])->name('print_both');
     });
 
     // --- BAST (Berita Acara Serah Terima) ---

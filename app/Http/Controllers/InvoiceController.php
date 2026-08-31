@@ -271,4 +271,10 @@ class InvoiceController extends Controller
         $invoice = Invoice::with(['offer.items', 'offer.jasaItems', 'additions'])->findOrFail($id);
         return view('invoice.print_surat_jalan', compact('invoice'));
     }
+
+    public function printBoth($id)
+    {
+        $invoice = Invoice::with(['offer.items', 'offer.jasaItems', 'additions', 'payments'])->findOrFail($id);
+        return view('invoice.print_both', compact('invoice'));
+    }
 }
