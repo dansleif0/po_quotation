@@ -99,6 +99,17 @@
                     </div>
                 </div>
 
+                {{-- Pengaturan Dokumen --}}
+                <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <h3 class="font-bold text-gray-700 text-sm mb-2">Pengaturan Dokumen</h3>
+                    <div class="flex items-center">
+                        <input id="tampilkan_comp_b" name="tampilkan_comp_b" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer" {{ !empty($offer->tampilkan_comp_b) ? 'checked' : '' }}>
+                        <label for="tampilkan_comp_b" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                            Tampilkan Comp B
+                        </label>
+                    </div>
+                </div>
+
                 {{-- Form Upload File PO Client --}}
                 <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <label for="po_file" class="block text-sm font-semibold text-gray-800 mb-1 flex items-center gap-2">

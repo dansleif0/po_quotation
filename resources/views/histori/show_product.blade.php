@@ -127,7 +127,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php $sumTotal = 0; @endphp
+                    @php 
+                        $sumTotal = 0; 
+                        $rowCounter = 1;
+                    @endphp
                     @foreach($offer->items as $idx => $item)
                     @php
                         $qty = $item->qty_order > 0 ? $item->qty_order : 1;
@@ -137,21 +140,56 @@
                         $sumTotal += $rowTotal;
                         $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
                     @endphp
-                    <tr>
-                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $idx + 1 }}</td>
-                        <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">
-                            <div>{{ $item->nama_produk }}</div>
-                            @if($offer->tampilkan_comp_b && !empty($compB))
-                                <div class="text-[10px] font-normal text-gray-700 normal-case mt-0.5">Comp B: {{ $compB }}</div>
-                            @endif
-                        </td>
-                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
-                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
-                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
-                        <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
-                        <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($priceL, 0, ',', '.') }}</td>
-                        <td class="text-right border border-black py-1.5 px-2 align-middle font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
-                    </tr>
+
+                    @if($offer->tampilkan_comp_b && !empty($compB))
+                        @php
+                            $compB_subtotal = round($rowTotal * 0.09);
+                            $compA_subtotal = $rowTotal - $compB_subtotal;
+
+                            $compB_price = round($priceL * 0.09);
+                            $compA_price = $priceL - $compB_price;
+                        @endphp
+                        {{-- Row 1: Main Product (Comp A) --}}
+                        <tr>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $rowCounter++ }}</td>
+                            <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">
+                                <div>{{ $item->nama_produk }}</div>
+                            </td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
+                            <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
+                            <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($compA_price, 0, ',', '.') }}</td>
+                            <td class="text-right border border-black py-1.5 px-2 align-middle font-semibold">{{ number_format($compA_subtotal, 0, ',', '.') }}</td>
+                        </tr>
+                        {{-- Row 2: Comp B --}}
+                        <tr>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $rowCounter++ }}</td>
+                            <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle text-gray-800">
+                                <div>{{ $compB }}</div>
+                            </td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
+                            <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
+                            <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($compB_price, 0, ',', '.') }}</td>
+                            <td class="text-right border border-black py-1.5 px-2 align-middle font-semibold">{{ number_format($compB_subtotal, 0, ',', '.') }}</td>
+                        </tr>
+                    @else
+                        {{-- Single Normal Row --}}
+                        <tr>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $rowCounter++ }}</td>
+                            <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">
+                                <div>{{ $item->nama_produk }}</div>
+                            </td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
+                            <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
+                            <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($priceL, 0, ',', '.') }}</td>
+                            <td class="text-right border border-black py-1.5 px-2 align-middle font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                        </tr>
+                    @endif
                     @endforeach
                     @if($offer->diskon_global > 0)
                     <tr>

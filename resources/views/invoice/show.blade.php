@@ -1,158 +1,350 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto my-12 px-4">
+@php
+if (!function_exists('terbilang_rupiah_scan')) {
+    function terbilang_rupiah_scan($angka) {
+        $angka = abs((float)$angka);
+        $baca = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
+        $terbilang = "";
+        if ($angka < 12) {
+            $terbilang = " " . $baca[(int)$angka];
+        } else if ($angka < 20) {
+            $terbilang = terbilang_rupiah_scan($angka - 10) . " belas";
+        } else if ($angka < 100) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 10)) . " puluh" . terbilang_rupiah_scan(fmod($angka, 10));
+        } else if ($angka < 200) {
+            $terbilang = " seratus" . terbilang_rupiah_scan($angka - 100);
+        } else if ($angka < 1000) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 100)) . " ratus" . terbilang_rupiah_scan(fmod($angka, 100));
+        } else if ($angka < 2000) {
+            $terbilang = " seribu" . terbilang_rupiah_scan($angka - 1000);
+        } else if ($angka < 1000000) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 1000)) . " ribu" . terbilang_rupiah_scan(fmod($angka, 1000));
+        } else if ($angka < 1000000000) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 1000000)) . " juta" . terbilang_rupiah_scan(fmod($angka, 1000000));
+        } else if ($angka < 1000000000000) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 1000000000)) . " milyar" . terbilang_rupiah_scan(fmod($angka, 1000000000));
+        }
+        return ucfirst(trim($terbilang));
+    }
+}
+@endphp
 
-    <div class="max-w-4xl mx-auto mb-4 flex justify-end gap-2 print:hidden">
+<div class="container mx-auto my-8 px-4">
+
+    {{-- Action Bar --}}
+    <div class="max-w-[26cm] mx-auto mb-4 flex flex-wrap justify-end gap-2 print:hidden">
         <a href="{{ route('invoice.histori') }}" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded hover:bg-gray-300">
             &larr; Kembali ke Histori
         </a>
+        @if($invoice->po_file_path)
+        <a href="{{ $invoice->po_file_url }}" target="_blank" class="bg-purple-600 text-white font-bold py-2 px-4 rounded hover:bg-purple-700 transition-colors shadow-sm inline-flex items-center gap-2">
+            📄 Lihat File PO Client
+        </a>
+        @endif
         <a href="{{ route('invoice.print', $invoice->id) }}" target="_blank" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition-colors shadow-sm inline-flex items-center gap-2">
             🖨️ Print Invoice (PDF)
         </a>
-    </div>
-
-    @if($invoice->po_file_path)
-    <div class="max-w-4xl mx-auto mb-4 bg-blue-50 border border-blue-200 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 print:hidden">
-        <div class="flex items-center gap-3">
-            <div class="p-2 bg-blue-600 text-white rounded-lg">
-                <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
-            </div>
-            <div>
-                <p class="font-bold text-blue-900 text-sm">File Purchase Order (PO) Client Terlampir</p>
-                <p class="text-xs text-blue-700">Berkas PO resmi dari klien tersedia untuk dilihat atau diunduh.</p>
-            </div>
-        </div>
-        <a href="{{ $invoice->po_file_url }}" target="_blank"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition shadow-sm inline-flex items-center gap-1.5 shrink-0">
-            <span>📄 Lihat / Download File PO</span>
+        <a href="{{ route('invoice.print_surat_jalan', $invoice->id) }}" target="_blank" class="bg-emerald-600 text-white font-bold py-2 px-4 rounded hover:bg-emerald-700 transition-colors shadow-sm inline-flex items-center gap-2">
+            🚚 Print Surat Jalan
         </a>
     </div>
-    @endif
 
-    <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 shadow-lg rounded-lg border" id="invoice-print-area">
+    {{-- Main Invoice Document Container --}}
+    <div class="max-w-[26cm] mx-auto bg-white p-8 md:p-10 shadow-xl rounded-lg border text-black font-sans text-[11px]" id="invoice-print-area">
 
-        {{-- HEADER KOP SURAT --}}
-        <header class="w-full mb-6">
-            <div class="w-full">
-                {{-- Menggunakan class w-full agar gambar memenuhi lebar kontainer --}}
-                <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat PT Tasniem Gerai Inspirasi" class="w-full h-auto">
-            </div>
-            {{-- Garis merah di bawah tetap dipertahankan atau dihapus sesuai keinginan --}}
-            <div class="w-full border-b-[4px] border-[#d32f2f] mt-1"></div>
-        </header>
-
-        <section class="mt-8 flex justify-between text-sm sans">
-            <div class="w-1/2">
-                <p class="font-bold mb-1">TO:</p>
-                <p class="font-bold text-lg uppercase">{{ $invoice->nama_klien }}</p>
-
-                @if($invoice->offer && $invoice->offer->client_details)
-                <p class="text-gray-700">{{ $invoice->offer->client_details }}</p>
-                @endif
-
-                <p class="mt-4 font-bold">Attn:</p>
-                <p>{{ $invoice->nama_klien }}</p>
-            </div>
-            <div class="w-1/2 text-right">
-                <div class="flex justify-end mb-1">
-                    <span class="w-24 text-left font-bold">Tanggal</span>
-                    <span class="text-left">: {{ \Carbon\Carbon::parse($invoice->created_at)->format('d F Y') }}</span>
-                </div>
-
-                {{-- NO INVOICE SESUAI DATABASE (KONSISTEN DENGAN HISTORI) --}}
-                <div class="flex justify-end">
-                    <span class="w-24 text-left font-bold">Invoice No.</span>
-                    <span class="text-left">: {{ $invoice->no_invoice }}</span>
+        {{-- HEADER SECTION --}}
+        <div class="flex justify-between items-start pb-2 gap-2">
+            {{-- Left Header: Logo TSI & Official Company Address --}}
+            <div class="flex items-start gap-3 w-5/12">
+                <img src="{{ asset('images/logo-tasniem.png') }}" alt="TSI Logo" class="h-14 w-auto object-contain shrink-0 mt-0.5">
+                <div class="text-[11px] leading-tight text-black font-medium">
+                    <h2 class="font-bold text-xs text-black">PT. TASNIEM GERAI INSPIRASI</h2>
+                    <p>Komp.Ruko KDA Junction Blok C 8-9</p>
+                    <p>Batam Centre</p>
+                    <p>No. Telp : +62 778 7485999</p>
+                    <p>Email : tgi_team040210@yahoo.com</p>
                 </div>
             </div>
-        </section>
 
-        <section class="mt-8 text-sm">
-            <p class="mb-2">Bersama ini kami sampaikan tagihan untuk:</p>
-            <p><span class="font-medium w-20 inline-block">Project</span>: {{ optional($invoice->offer)->perihal ?? 'Pengecatan dan Supply Cat Jotun Paints' }}</p>
-            @if($invoice->offer && $invoice->offer->client_details)
-            <p><span class="font-medium w-20 inline-block">Alamat</span>: {{ $invoice->offer->client_details }}</p>
-            @endif
+            {{-- Center Header: INVOICE Title --}}
+            <div class="w-2/12 text-center pt-2">
+                <h1 class="text-xl font-bold tracking-wider uppercase underline">INVOICE</h1>
+            </div>
 
-            <table class="w-full mt-4 border-collapse border border-black">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="border border-black p-2 text-left font-semibold">No.</th>
-                        <th class="border border-black p-2 text-left font-semibold">Keterangan</th>
-                        <th class="border border-black p-2 text-right font-semibold">Total</th>
+            {{-- Right Header: Logo Jotun --}}
+            <div class="w-5/12 flex justify-end items-start">
+                <img src="{{ asset('images/logo-jotun.png') }}" alt="Jotun Logo" class="h-12 w-auto object-contain">
+            </div>
+        </div>
+
+        {{-- META INFO SECTION --}}
+        <div class="grid grid-cols-2 gap-4 my-3 text-[11px] font-sans">
+            {{-- Left Side: Invoice No & Tanggal --}}
+            <div class="space-y-0.5">
+                <div class="flex">
+                    <span class="w-24 font-bold uppercase">INVOICE NO</span>
+                    <span class="font-semibold">: {{ $invoice->no_invoice }}</span>
+                </div>
+                <div class="flex">
+                    <span class="w-24 font-bold uppercase">TANGGAL</span>
+                    <span>: {{ \Carbon\Carbon::parse($invoice->created_at)->format('d F Y') }}</span>
+                </div>
+            </div>
+
+            {{-- Right Side: Kepada, Telepon, Sales --}}
+            <div class="space-y-0.5 pl-8">
+                <div class="flex items-start">
+                    <span class="w-16 font-bold shrink-0">Kepada</span>
+                    <div class="font-bold text-black uppercase leading-tight">
+                        : {{ strtoupper($invoice->nama_klien) }}
+                        @if($invoice->offer && $invoice->offer->client_details)
+                        <div class="font-normal text-[11px] text-gray-800 uppercase leading-tight mt-0.5">{{ $invoice->offer->client_details }}</div>
+                        @endif
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-16 font-bold shrink-0">Telepon</span>
+                    <span>: -</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-16 font-bold shrink-0">Sales</span>
+                    <span class="font-bold">: YASRI</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- MAIN TABLE --}}
+        <div class="my-3">
+            <table class="w-full text-[11px] border-collapse">
+                <thead>
+                    <tr class="border-t border-b border-black font-bold text-black uppercase">
+                        <th class="py-1.5 px-1 text-center w-8">NO</th>
+                        <th class="py-1.5 px-2 text-left">NAMA BARANG</th>
+                        <th class="py-1.5 px-2 text-center w-24">JUMLAH</th>
+                        <th class="py-1.5 px-2 text-center w-16">BONUS</th>
+                        <th class="py-1.5 px-2 text-right w-24">@HARGA</th>
+                        <th class="py-1.5 px-2 text-right w-24">HARGA</th>
+                        <th class="py-1.5 px-2 text-center w-20">DISCOUNT</th>
+                        <th class="py-1.5 px-2 text-right w-28">TOTAL</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td class="border border-black p-2 text-center">1</td>
-                        <td class="border border-black p-2">Total Pengecatan (sesuai Penawaran)</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
-                    </tr>
+                <tbody class="divide-y divide-gray-100">
+                    @php $rowCounter = 1; @endphp
+                    @if(!empty($invoice->tampilkan_comp_b) && $invoice->offer && $invoice->offer->items->isNotEmpty())
+                        @foreach($invoice->offer->items as $item)
+                            @php
+                                $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
+                                $packing = $item->packing_size ?? '';
+                                $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
+                                $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
+                                $rowTotal = $consumption * $priceL;
+                                $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
 
-                    @foreach($invoice->additions as $index => $addition)
-                    <tr>
-                        <td class="border border-black p-2 text-center">{{ $index + 2 }}</td>
-                        <td class="border border-black p-2">{{ $addition->nama_pekerjaan }}</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($addition->harga, 0, ',', '.') }}</td>
-                    </tr>
-                    @endforeach
+                                $namaCompA = $item->nama_produk;
+                                if ($compB && !str_contains(strtoupper($namaCompA), 'CPA')) {
+                                    $namaCompA .= ' CPA';
+                                }
+                                $namaCompB = $compB;
+                                if ($compB && !str_contains(strtoupper($namaCompB), 'CPB')) {
+                                    $namaCompB .= ' CPB';
+                                }
+                            @endphp
 
-                    <tr>
-                        <td class="border border-black p-2 h-8"></td>
-                        <td class="border border-black p-2"></td>
-                        <td class="border border-black p-2"></td>
-                    </tr>
-
-                    <tr class="font-medium">
-                        <td colspan="2" class="border border-black p-2 text-right">TOTAL</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($invoice->total_penawaran + $invoice->total_tambahan, 0, ',', '.') }}</td>
-                    </tr>
-
-                    @if($invoice->diskon > 0)
-                    <tr class="font-medium">
-                        <td colspan="2" class="border border-black p-2 text-right">Diskon</td>
-                        <td class="border border-black p-2 text-right text-red-600">- Rp {{ number_format($invoice->diskon, 0, ',', '.') }}</td>
-                    </tr>
+                            @if(!empty($compB))
+                                @php
+                                    $compB_subtotal = round($rowTotal * 0.09);
+                                    $compA_subtotal = $rowTotal - $compB_subtotal;
+                                    $compB_price = round($priceL * 0.09);
+                                    $compA_price = $priceL - $compB_price;
+                                @endphp
+                                {{-- Row 1: Comp A --}}
+                                <tr class="align-top">
+                                    <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-1.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($namaCompA) }}</span>
+                                            <span class="font-normal text-[10px] pr-2">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-1.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-1.5 px-2 text-center"></td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($compA_price, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($compA_subtotal, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                                    <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($compA_subtotal, 0, ',', '.') }}</td>
+                                </tr>
+                                {{-- Row 2: Comp B --}}
+                                <tr class="align-top">
+                                    <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-1.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($namaCompB) }}</span>
+                                            <span class="font-normal text-[10px] pr-2">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-1.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-1.5 px-2 text-center"></td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($compB_price, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($compB_subtotal, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                                    <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($compB_subtotal, 0, ',', '.') }}</td>
+                                </tr>
+                            @else
+                                <tr class="align-top">
+                                    <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-1.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($item->nama_produk) }}</span>
+                                            <span class="font-normal text-[10px] pr-2">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-1.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-1.5 px-2 text-center"></td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($priceL, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                                    <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    @elseif($invoice->offer && $invoice->offer->items->isNotEmpty())
+                        @foreach($invoice->offer->items as $item)
+                            @php
+                                $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
+                                $packing = $item->packing_size ?? '';
+                                $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
+                                $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
+                                $rowTotal = $consumption * $priceL;
+                            @endphp
+                            <tr class="align-top">
+                                <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                <td class="py-1.5 px-2">
+                                    <div class="flex justify-between items-center font-bold">
+                                        <span>{{ strtoupper($item->nama_produk) }}</span>
+                                        <span class="font-normal text-[10px] pr-2">{{ $packing }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-1.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                <td class="py-1.5 px-2 text-center"></td>
+                                <td class="py-1.5 px-2 text-right">{{ number_format($priceL, 0, ',', '.') }}</td>
+                                <td class="py-1.5 px-2 text-right">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                                <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                                <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr class="align-top">
+                            <td class="py-1.5 px-1 text-center font-semibold">1.</td>
+                            <td class="py-1.5 px-2 font-bold">{{ strtoupper(optional($invoice->offer)->perihal ?? 'Total Pekerjaan / Supply Cat (sesuai Penawaran)') }}</td>
+                            <td class="py-1.5 px-2 text-center font-semibold">1 PAKET</td>
+                            <td class="py-1.5 px-2 text-center"></td>
+                            <td class="py-1.5 px-2 text-right">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
+                            <td class="py-1.5 px-2 text-right">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
+                            <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                            <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
+                        </tr>
                     @endif
 
-                    <tr class="font-bold bg-gray-100">
-                        <td colspan="2" class="border border-black p-2 text-right">TOTAL TAGIHAN</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($invoice->grand_total, 0, ',', '.') }}</td>
-                    </tr>
-
-                    @foreach($invoice->payments as $payment)
-                    <tr class="font-medium text-gray-600">
-                        <td colspan="2" class="border border-black p-2 text-right">{{ $payment->keterangan }}</td>
-                        <td class="border border-black p-2 text-right text-green-600">- Rp {{ number_format($payment->jumlah, 0, ',', '.') }}</td>
+                    {{-- Pekerjaan Tambahan --}}
+                    @foreach($invoice->additions as $addition)
+                    <tr class="align-top">
+                        <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                        <td class="py-1.5 px-2 font-bold">{{ strtoupper($addition->nama_pekerjaan) }}</td>
+                        <td class="py-1.5 px-2 text-center font-semibold">1 Ls</td>
+                        <td class="py-1.5 px-2 text-center"></td>
+                        <td class="py-1.5 px-2 text-right">{{ number_format($addition->harga, 0, ',', '.') }}</td>
+                        <td class="py-1.5 px-2 text-right">{{ number_format($addition->harga, 0, ',', '.') }}</td>
+                        <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                        <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($addition->harga, 0, ',', '.') }}</td>
                     </tr>
                     @endforeach
-
-                    <tr class="font-bold text-xl bg-gray-200">
-                        <td colspan="2" class="border border-black p-2 text-right">SISA PEMBAYARAN</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($invoice->sisa_pembayaran, 0, ',', '.') }}</td>
-                    </tr>
                 </tbody>
             </table>
-        </section>
+            <div class="border-b border-black w-full mt-0.5"></div>
+        </div>
 
-        <section class="mt-12 flex justify-between text-sm">
-            <div class="text-center">
-                <p>Hormat kami,</p>
-                <p>PT. Tasniem Gerai Inspirasi</p>
-                <div class="h-28 w-48 relative">
-                    <img src="{{ asset('images/ttd.png') }}" alt="Logo & Tanda Tangan" class="h-28 opacity-100 mx-auto">
+        {{-- SUMMARY & NOTES SECTION --}}
+        <div class="grid grid-cols-12 gap-4 text-[11px] font-sans my-3">
+            {{-- Left Column: Credit Term, Catatan, Terbilang, Printed By --}}
+            <div class="col-span-7 space-y-1 pr-4">
+                <div class="flex items-center gap-8">
+                    <div><span class="font-bold uppercase">CREDIT TERM :</span> 0 hari</div>
+                    <div><span class="font-bold uppercase">JATUH TEMPO :</span> {{ \Carbon\Carbon::parse($invoice->created_at)->format('d F Y') }}</div>
                 </div>
-                <p class="font-bold text-gray-800">SAMSU RIZAL</p>
-                <p class="text-gray-600">General Manager</p>
+
+                <div>
+                    <span class="font-bold">Catatan :</span> {{ strtoupper($invoice->nama_klien) }} {{ $invoice->offer && $invoice->offer->client_details ? '- ' . strtoupper($invoice->offer->client_details) : '' }}
+                </div>
+
+                <div>
+                    <span class="font-bold">Terbilang :</span> {{ terbilang_rupiah_scan($invoice->grand_total) }} rupiah
+                </div>
+
+                <div class="text-[10px] text-black pt-0.5">
+                    <span class="font-bold">Printed By :</span> Admin, {{ date('H:i:s, l, d F Y') }}
+                </div>
             </div>
-            <div class="text-left">
-                <p class="font-medium">Pembayaran melalui Bank:</p>
-                <p>a/n PT. Tasniem Gerai Inspirasi</p>
-                <p>Bank BRI Cab. Nagoya</p>
-                <p>Rek. No. 0331 - 0100 1817 306</p>
+
+            {{-- Right Column: TOTAL, DISCOUNT, PPN, GRAND TOTAL --}}
+            <div class="col-span-5 text-right space-y-1 font-medium">
+                <div class="flex justify-between">
+                    <span class="font-bold">TOTAL</span>
+                    <span>: IDR {{ number_format($invoice->total_penawaran + $invoice->total_tambahan, 0, ',', '.') }}</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="font-bold">DISCOUNT</span>
+                    <span>: IDR {{ $invoice->diskon > 0 ? '- ' . number_format($invoice->diskon, 0, ',', '.') : '-' }}</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="font-bold">PPN</span>
+                    <span>: IDR -</span>
+                </div>
+
+                <div class="border-t border-black my-0.5"></div>
+
+                <div class="flex justify-between text-xs font-bold">
+                    <span class="font-bold">GRAND TOTAL</span>
+                    <span>: IDR {{ number_format($invoice->grand_total, 0, ',', '.') }}</span>
+                </div>
+
+                @if($invoice->payments && $invoice->payments->count() > 0)
+                    @foreach($invoice->payments as $payment)
+                    <div class="flex justify-between">
+                        <span class="font-semibold">{{ strtoupper($payment->keterangan) }}</span>
+                        <span>: IDR - {{ number_format($payment->jumlah, 0, ',', '.') }}</span>
+                    </div>
+                    @endforeach
+                    <div class="flex justify-between text-xs font-bold text-blue-900">
+                        <span class="font-bold">SISA PEMBAYARAN</span>
+                        <span>: IDR {{ number_format($invoice->sisa_pembayaran, 0, ',', '.') }}</span>
+                    </div>
+                @endif
             </div>
-        </section>
+        </div>
+
+        {{-- SIGNATURE SECTION (4 Columns with Solid Horizontal Line at Bottom - NO STAMP / NO IMAGE) --}}
+        <div class="mt-16 grid grid-cols-4 text-center text-[11px] font-sans gap-8">
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Yang Menerima,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Kepala Gudang,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Supir/Helper,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Hormat kami,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+        </div>
 
     </div>
 </div>
@@ -160,7 +352,7 @@
 <style>
     @media print {
         .print\:hidden {
-            display: none;
+            display: none !important;
         }
 
         body * {
@@ -172,34 +364,21 @@
             visibility: visible;
         }
 
+        @page {
+            size: A4 landscape;
+            margin: 8mm;
+        }
+
         #invoice-print-area {
             position: absolute;
             left: 0;
             top: 0;
-            width: 100%;
-            box-shadow: none;
-            border: none;
-            margin: 0;
-            padding: 0.5in;
+            width: 100% !important;
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 8mm !important;
             font-size: 10pt;
-        }
-
-        /* Hindari page-break di dalam tabel */
-        table {
-            page-break-inside: auto;
-        }
-
-        tr {
-            page-break-inside: avoid;
-            page-break-after: auto;
-        }
-
-        thead {
-            display: table-header-group;
-        }
-
-        tfoot {
-            display: table-footer-group;
         }
     }
 </style>

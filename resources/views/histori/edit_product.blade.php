@@ -52,26 +52,8 @@
                 </div>
             </fieldset>
 
-            <div class="mt-8 pt-6 border-t grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-gray-50 p-4 rounded-lg h-fit">
-                    <h4 class="font-semibold text-gray-700 mb-3">Opsi Dokumen</h4>
-
-                    <div class="flex items-start mb-3">
-                        <div class="flex items-center h-5">
-                            <input id="tampilkan_comp_b" name="tampilkan_comp_b" type="checkbox" value="1" class="h-4 w-4 text-blue-600 border-gray-300 rounded cursor-pointer" {{ !empty($offer->tampilkan_comp_b) ? 'checked' : '' }}>
-                        </div>
-                        <div class="ml-3 text-sm"><label for="tampilkan_comp_b" class="font-medium text-gray-700 cursor-pointer">Tampilkan Comp B</label></div>
-                    </div>
-
-                    <div class="flex items-start">
-                        <div class="flex items-center h-5">
-                            <input id="hilangkan_grand_total" name="hilangkan_grand_total" type="checkbox" value="1" class="h-4 w-4 text-blue-600 border-gray-300 rounded cursor-pointer" {{ $offer->hilangkan_grand_total ? 'checked' : '' }}>
-                        </div>
-                        <div class="ml-3 text-sm"><label for="hilangkan_grand_total" class="font-medium text-gray-700 cursor-pointer">Sembunyikan Grand Total</label></div>
-                    </div>
-                </div>
-
-                <div class="bg-blue-50 p-6 rounded-lg flex flex-col gap-3">
+            <div class="mt-8 pt-6 border-t flex justify-end">
+                <div class="w-full md:w-1/2 bg-blue-50 p-6 rounded-lg flex flex-col gap-3">
                     <div class="flex justify-between text-gray-600 text-sm"><span>Total QTY:</span><span id="display-total-qty" class="font-semibold">0</span></div>
                     <div class="flex justify-between text-gray-700 font-medium"><span>Total Harga Produk:</span><span id="display-subtotal">Rp 0</span></div>
 

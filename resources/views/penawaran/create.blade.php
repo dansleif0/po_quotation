@@ -177,23 +177,7 @@
             </div>
 
             {{-- Summary & Diskon --}}
-            <div class="mt-8 pt-6 border-t border-slate-200/80 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                <div class="w-full md:w-80 space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200/60">
-                    <h3 class="font-bold text-slate-700 text-sm mb-2">Pengaturan Dokumen</h3>
-                    <div class="flex items-center">
-                        <input id="tampilkan_comp_b" name="tampilkan_comp_b" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer">
-                        <label for="tampilkan_comp_b" class="ml-2 block text-sm text-slate-700 cursor-pointer">
-                            Tampilkan Comp B
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <input id="hilangkan_grand_total" name="hilangkan_grand_total" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer">
-                        <label for="hilangkan_grand_total" class="ml-2 block text-sm text-slate-700 cursor-pointer">
-                            Sembunyikan Grand Total
-                        </label>
-                    </div>
-                </div>
-
+            <div class="mt-8 pt-6 border-t border-slate-200/80 flex justify-end">
                 <div class="w-full md:w-80 space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200/60">
                     <div class="flex justify-between items-center text-sm font-semibold text-slate-600">
                         <span>Subtotal Keseluruhan:</span>
@@ -608,24 +592,10 @@
             selProduct.addEventListener('change', function() {
                 const opt = selProduct.options[selProduct.selectedIndex];
                 if (opt.value) {
+                    const prodObj = registeredProducts.find(p => p.id == opt.value);
                     inpNama.value = opt.dataset.nama || opt.text;
 
-                    let pSize = opt.dataset.packing ? opt.dataset.packing.trim() : '';
-                    if (pSize) {
-                        let matched = false;
-                        for (let i = 0; i < selPacking.options.length; i++) {
-                            let val = selPacking.options[i].value;
-                            if (val.toString().toLowerCase().includes(pSize.toLowerCase()) || pSize.toLowerCase().includes(val.toString().toLowerCase())) {
-                                selPacking.selectedIndex = i;
-                                matched = true;
-                                break;
-                            }
-                        }
-                        if (!matched) {
-                            let newOpt = new Option(pSize.includes('L') ? pSize : pSize + ' L', pSize.includes('L') ? pSize : pSize + ' L', true, true);
-                            selPacking.add(newOpt);
-                        }
-                    }
+                    updatePackingOptions(tr, prodObj);
 
                     let basePrice = parseFloat(opt.dataset.price || 0);
                     inpBasePrice.value = basePrice;
@@ -634,6 +604,7 @@
                     let markedUpPrice = Math.round(basePrice * 1.40);
                     inpPrice.value = markedUpPrice;
                 } else {
+                    updatePackingOptions(tr, null);
                     inpBasePrice.value = 0;
                     inpNama.value = '';
                 }
@@ -672,6 +643,73 @@
 
             updateRowNumbers();
             recalculateRow(tr);
+        }
+
+        const defaultSizes = ['1 L', '2.5 L', '5 L', '8.75 L', '18 L', '20 L', '25 L'];
+
+        function getAvailablePackingSizes(prod) {
+            if (!prod) return [];
+            let sizes = [];
+
+            if (prod.packings && Array.isArray(prod.packings) && prod.packings.length > 0) {
+                prod.packings.forEach(pk => {
+                    if (pk.packing_size && pk.packing_size.trim()) {
+                        sizes.push(pk.packing_size.trim());
+                    }
+                });
+            }
+
+            if (prod.packing_size && prod.packing_size.trim()) {
+                let parts = prod.packing_size.split(/[,;\/]+/);
+                parts.forEach(p => {
+                    let t = p.trim();
+                    if (t && !sizes.includes(t)) {
+                        sizes.push(t);
+                    }
+                });
+            }
+
+            let result = [];
+            sizes.forEach(s => {
+                let upper = s.toUpperCase();
+                let formatted = upper.includes('L') ? s : s + ' L';
+                if (!result.includes(formatted)) {
+                    result.push(formatted);
+                }
+            });
+
+            return result;
+        }
+
+        function updatePackingOptions(tr, prod, selectedSize = null) {
+            const selPacking = tr.querySelector('.sel-packing');
+            if (!selPacking) return;
+
+            let availableSizes = getAvailablePackingSizes(prod);
+            let sizesToUse = (availableSizes && availableSizes.length > 0) ? availableSizes : defaultSizes;
+
+            let currentVal = selectedSize || selPacking.value;
+            selPacking.innerHTML = '';
+
+            sizesToUse.forEach(size => {
+                let opt = new Option(size, size);
+                selPacking.add(opt);
+            });
+
+            if (currentVal) {
+                let matched = false;
+                for (let i = 0; i < selPacking.options.length; i++) {
+                    if (selPacking.options[i].value.toLowerCase() === currentVal.toLowerCase()) {
+                        selPacking.selectedIndex = i;
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched && sizesToUse === defaultSizes) {
+                    let customOpt = new Option(currentVal, currentVal, true, true);
+                    selPacking.add(customOpt);
+                }
+            }
         }
 
         function getNumericPackingSize(str) {

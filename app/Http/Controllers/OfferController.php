@@ -31,7 +31,7 @@ class OfferController extends Controller
     public function create()
     {
         $clients = Client::orderBy('nama_klien', 'asc')->get();
-        $products = Product::orderBy('nama_produk', 'asc')->get();
+        $products = Product::with('packings')->orderBy('nama_produk', 'asc')->get();
 
         // Format No. Surat Resmi Kantor: 0010133/SP/TGI-1/VIII/2026
         $bulanRomawi = [
@@ -134,15 +134,86 @@ class OfferController extends Controller
             'nama_klien' => 'required|string|max:255',
             'client_details' => 'nullable|string',
             'perihal' => 'nullable|string|max:255',
-            'produk.*.nama' => 'nullable|string',
-            'jasa.*.nama' => 'nullable|string',
         ]);
 
         return DB::transaction(function () use ($request, $offer) {
+            if ($request->has('items')) {
+                $grandTotal = 0;
+                foreach ($request->items as $itemData) {
+                    $consumption = (float)($itemData['consumption_l'] ?? 0);
+                    $price = (float)($itemData['price_per_liter'] ?? 0);
+                    $grandTotal += ($consumption * $price);
+                }
+
+                $diskonGlobal = (float)($request->diskon_global ?? 0);
+                $finalTotal = max(0, $grandTotal - $diskonGlobal);
+
+                $data = [
+                    'no_surat'            => $request->no_surat ?? $offer->no_surat,
+                    'project_no'          => $request->project_no,
+                    'client_id'           => $request->client_id,
+                    'nama_klien'          => $request->nama_klien,
+                    'client_details'      => $request->client_details,
+                    'perihal'             => $request->perihal ?? 'Penawaran Quotation Produk',
+                    'jenis_penawaran'     => 'produk',
+                    'diskon_global'       => $diskonGlobal,
+                    'total_keseluruhan'   => $finalTotal,
+                    'tampilkan_comp_b'    => $request->has('tampilkan_comp_b') ? 1 : 0,
+                    'hilangkan_grand_total' => $request->has('hilangkan_grand_total') ? 1 : 0,
+                ];
+
+                if ($request->input('action') == 'save_and_copy') {
+                    if ($data['nama_klien'] === $offer->nama_klien) {
+                        $data['nama_klien'] .= ' (Copy)';
+                    }
+                    $targetOffer = Offer::create($data);
+                    $message = 'Data berhasil disalin sebagai Penawaran Baru!';
+                } else {
+                    $offer->update($data);
+                    $targetOffer = $offer;
+                    $targetOffer->items()->delete();
+                    $targetOffer->jasaItems()->delete();
+                    $message = 'Surat penawaran berhasil diperbarui.';
+                }
+
+                foreach ($request->items as $itemData) {
+                    $status = $itemData['status_produk'] ?? 'READY';
+                    if ($status === 'OTHER' && !empty($itemData['status_other'])) {
+                        $status = $itemData['status_other'];
+                    }
+
+                    $pricePerLiter = (float)($itemData['price_per_liter'] ?? 0);
+                    $basePrice = (float)($itemData['base_price_per_liter'] ?? 0);
+                    $consumption = (float)($itemData['consumption_l'] ?? 0);
+                    $qtyOrder = (float)($itemData['qty_order'] ?? 0);
+
+                    $prod = !empty($itemData['product_id']) ? Product::find($itemData['product_id']) : Product::where('nama_produk', $itemData['nama_produk'])->first();
+
+                    $targetOffer->items()->create([
+                        'product_id'           => $itemData['product_id'] ?? $prod?->id,
+                        'nama_produk'          => $itemData['nama_produk'],
+                        'comp_b'               => $prod?->comp_b,
+                        'packing_size'         => $itemData['packing_size'] ?? '',
+                        'qty_order'            => $qtyOrder,
+                        'consumption_l'        => $consumption,
+                        'status_produk'        => $status,
+                        'price_per_liter'      => $pricePerLiter,
+                        'base_price_per_liter' => $basePrice,
+                        'harga_per_m2'         => $pricePerLiter,
+                        'volume'               => $consumption,
+                    ]);
+                }
+
+                if ($request->input('action') == 'save_and_copy') {
+                    return redirect()->route('histori.edit', $targetOffer->id)->with('success', $message);
+                }
+                return redirect()->route('histori.index')->with('success', $message);
+            }
+
             $totalProduk = 0;
             $totalJasa = 0;
 
-            // Hitung Total
+            // Hitung Total (Legacy fallback)
             if ($request->has('produk')) {
                 foreach ($request->produk as $p) {
                     if (!empty($p['nama'])) {
@@ -224,7 +295,6 @@ class OfferController extends Controller
         });
     }
 
-    // ... method lainnya (show, edit, destroy, print) tetap sama ...
     public function show($id)
     {
         $offer = Offer::with(['items', 'jasaItems'])->findOrFail($id);
@@ -235,8 +305,9 @@ class OfferController extends Controller
     public function edit(Offer $offer)
     {
         $offer->load(['items', 'jasaItems']);
-        $all_products = Product::all();
-        return view('histori.edit', compact('offer', 'all_products'));
+        $clients = Client::orderBy('nama_klien', 'asc')->get();
+        $products = Product::with('packings')->orderBy('nama_produk', 'asc')->get();
+        return view('histori.edit', compact('offer', 'clients', 'products'));
     }
 
     public function destroy(Offer $offer)

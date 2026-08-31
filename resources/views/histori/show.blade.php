@@ -120,6 +120,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
+                        @php $rowCounter = 1; @endphp
                         @foreach($offer->items as $index => $item)
                         @php
                             $qty = $item->qty_order > 0 ? $item->qty_order : 1;
@@ -128,25 +129,68 @@
                             $subtotal = $consumption * $priceL;
                             $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
                         @endphp
-                        <tr class="hover:bg-gray-50">
-                            <td class="py-2 px-2 text-gray-600 align-middle text-center">{{ $index + 1 }}</td>
-                            <td class="py-2 px-2 text-gray-900 font-bold align-middle">
-                                <div>{{ $item->nama_produk }}</div>
-                                @if($offer->tampilkan_comp_b && !empty($compB))
-                                    <div class="text-[11px] font-normal text-blue-600 mt-0.5">Comp B: {{ $compB }}</div>
-                                @endif
-                            </td>
-                            <td class="py-2 px-2 text-gray-700 align-middle">{{ $item->packing_size ?: '-' }}</td>
-                            <td class="py-2 px-2 text-gray-700 text-right align-middle font-semibold">{{ $qty + 0 }}</td>
-                            <td class="py-2 px-2 text-gray-700 text-right font-bold align-middle text-blue-700">{{ $consumption + 0 }} L</td>
-                            <td class="py-2 px-2 align-middle text-center">
-                                <span class="px-2 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">
-                                    {{ $item->status_produk ?: 'READY' }}
-                                </span>
-                            </td>
-                            <td class="py-2 px-2 text-gray-700 text-right align-middle">Rp {{ number_format($priceL, 0, ',', '.') }}</td>
-                            <td class="py-2 px-2 text-gray-900 font-extrabold text-right align-middle">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
-                        </tr>
+
+                        @if($offer->tampilkan_comp_b && !empty($compB))
+                            @php
+                                $compB_subtotal = round($subtotal * 0.09);
+                                $compA_subtotal = $subtotal - $compB_subtotal;
+
+                                $compB_price = round($priceL * 0.09);
+                                $compA_price = $priceL - $compB_price;
+                            @endphp
+                            {{-- Row 1: Comp A --}}
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-2 px-2 text-gray-600 align-middle text-center">{{ $rowCounter++ }}</td>
+                                <td class="py-2 px-2 text-gray-900 font-bold align-middle">
+                                    <div>{{ $item->nama_produk }}</div>
+                                </td>
+                                <td class="py-2 px-2 text-gray-700 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                                <td class="py-2 px-2 text-gray-700 text-right align-middle font-semibold">{{ $qty + 0 }}</td>
+                                <td class="py-2 px-2 text-gray-700 text-right font-bold align-middle text-blue-700">{{ $consumption + 0 }} L</td>
+                                <td class="py-2 px-2 align-middle text-center">
+                                    <span class="px-2 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">
+                                        {{ $item->status_produk ?: 'READY' }}
+                                    </span>
+                                </td>
+                                <td class="py-2 px-2 text-gray-700 text-right align-middle">Rp {{ number_format($compA_price, 0, ',', '.') }}</td>
+                                <td class="py-2 px-2 text-gray-900 font-extrabold text-right align-middle">Rp {{ number_format($compA_subtotal, 0, ',', '.') }}</td>
+                            </tr>
+                            {{-- Row 2: Comp B --}}
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-2 px-2 text-gray-600 align-middle text-center">{{ $rowCounter++ }}</td>
+                                <td class="py-2 px-2 text-gray-800 font-bold align-middle">
+                                    <div>{{ $compB }}</div>
+                                </td>
+                                <td class="py-2 px-2 text-gray-700 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                                <td class="py-2 px-2 text-gray-700 text-right align-middle font-semibold">{{ $qty + 0 }}</td>
+                                <td class="py-2 px-2 text-gray-700 text-right font-bold align-middle text-blue-700">{{ $consumption + 0 }} L</td>
+                                <td class="py-2 px-2 align-middle text-center">
+                                    <span class="px-2 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">
+                                        {{ $item->status_produk ?: 'READY' }}
+                                    </span>
+                                </td>
+                                <td class="py-2 px-2 text-gray-700 text-right align-middle">Rp {{ number_format($compB_price, 0, ',', '.') }}</td>
+                                <td class="py-2 px-2 text-gray-900 font-extrabold text-right align-middle">Rp {{ number_format($compB_subtotal, 0, ',', '.') }}</td>
+                            </tr>
+                        @else
+                            {{-- Normal Row --}}
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-2 px-2 text-gray-600 align-middle text-center">{{ $rowCounter++ }}</td>
+                                <td class="py-2 px-2 text-gray-900 font-bold align-middle">
+                                    <div>{{ $item->nama_produk }}</div>
+                                </td>
+                                <td class="py-2 px-2 text-gray-700 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                                <td class="py-2 px-2 text-gray-700 text-right align-middle font-semibold">{{ $qty + 0 }}</td>
+                                <td class="py-2 px-2 text-gray-700 text-right font-bold align-middle text-blue-700">{{ $consumption + 0 }} L</td>
+                                <td class="py-2 px-2 align-middle text-center">
+                                    <span class="px-2 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">
+                                        {{ $item->status_produk ?: 'READY' }}
+                                    </span>
+                                </td>
+                                <td class="py-2 px-2 text-gray-700 text-right align-middle">Rp {{ number_format($priceL, 0, ',', '.') }}</td>
+                                <td class="py-2 px-2 text-gray-900 font-extrabold text-right align-middle">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                            </tr>
+                        @endif
                         @endforeach
                     </tbody>
                 </table>

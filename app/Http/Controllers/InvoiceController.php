@@ -59,12 +59,6 @@ class InvoiceController extends Controller
      * Menyimpan invoice baru yang dibuat dari penawaran.
      */
 
-    public function print($id)
-    {
-        $invoice = \App\Models\Invoice::with(['offer', 'additions', 'payments'])->findOrFail($id);
-        return view('invoice.print', compact('invoice'));
-    }
-
 
     public function storeFromOffer(Request $request)
     {
@@ -115,6 +109,7 @@ class InvoiceController extends Controller
             'grand_total' => $grand_total,
             'total_dp' => $total_dp,
             'sisa_pembayaran' => $sisa_pembayaran,
+            'tampilkan_comp_b' => $request->has('tampilkan_comp_b') ? 1 : 0,
         ]);
 
         // 2. Simpan data ke tabel 'invoice_additions'
@@ -223,6 +218,7 @@ class InvoiceController extends Controller
             'grand_total' => $grand_total,
             'total_dp' => $total_dp,
             'sisa_pembayaran' => $sisa_pembayaran,
+            'tampilkan_comp_b' => $request->has('tampilkan_comp_b') ? 1 : 0,
         ]);
 
         // 2. Hapus data lama dan simpan data baru ke 'invoice_additions'
@@ -260,11 +256,19 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        // Menggunakan Route-Model Binding (Invoice $invoice)
-        // untuk otomatis menemukan data invoice berdasarkan ID dari URL.
-
         $invoice->delete();
-
         return redirect()->route('invoice.histori')->with('success', 'Invoice berhasil dihapus!');
+    }
+
+    public function print($id)
+    {
+        $invoice = Invoice::with(['offer.items', 'offer.jasaItems', 'additions', 'payments'])->findOrFail($id);
+        return view('invoice.print', compact('invoice'));
+    }
+
+    public function printSuratJalan($id)
+    {
+        $invoice = Invoice::with(['offer.items', 'offer.jasaItems', 'additions'])->findOrFail($id);
+        return view('invoice.print_surat_jalan', compact('invoice'));
     }
 }

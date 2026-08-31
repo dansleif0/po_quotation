@@ -19,6 +19,15 @@
                         <input type="text" name="no_invoice" id="no_invoice" value="INV/2025/10/001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800">
                     </div>
                 </div>
+                <div class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <h3 class="font-bold text-gray-700 text-sm mb-2">Pengaturan Dokumen</h3>
+                    <div class="flex items-center">
+                        <input id="tampilkan_comp_b" name="tampilkan_comp_b" type="checkbox" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer">
+                        <label for="tampilkan_comp_b" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                            Tampilkan Comp B
+                        </label>
+                    </div>
+                </div>
             </fieldset>
 
             <fieldset class="border-t pt-6 mt-8">

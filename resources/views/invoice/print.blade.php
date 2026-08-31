@@ -9,12 +9,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* 1. RESET STANDAR UNTUK PRINT */
         @media print {
             @page {
-                size: A4;
-                margin: 0;
-                /* Margin nol agar kita kontrol penuh lewat CSS */
+                size: A4 landscape;
+                margin: 8mm;
             }
 
             body {
@@ -29,68 +27,26 @@
                 display: none !important;
             }
 
-            /* KONTROL PRESISI A4 */
             #main-container {
-                width: 210mm;
-                /* Jangan gunakan min-height: 297mm agar jika konten sedikit tidak memaksa 2 halaman */
+                width: 100% !important;
                 margin: 0 auto !important;
-                padding: 15mm 20mm !important;
-                /* Margin konten standar surat */
+                padding: 8mm !important;
                 box-shadow: none !important;
                 border: none !important;
-                float: none !important;
-            }
-
-            /* LOGIKA PRINT TANPA KOP */
-            .hide-header-on-print .invoice-header {
-                display: none !important;
-            }
-
-            .hide-header-on-print #main-container {
-                padding-top: 60mm !important;
-                /* Sesuaikan dengan tinggi Kop fisik Anda */
-            }
-
-            /* ANTI TERPOTONG */
-            table {
-                page-break-inside: auto;
-                width: 100%;
-            }
-
-            tr {
-                page-break-inside: avoid;
-                page-break-after: auto;
-            }
-
-            thead {
-                display: table-header-group;
-            }
-
-            /* Mencegah bagian tanda tangan terpisah sendirian di halaman baru */
-            .signature-section {
-                page-break-inside: avoid;
             }
         }
 
-        /* 2. TAMPILAN LAYAR (PREVIEW) */
         body {
-
             background-color: #f3f4f6;
-            /* Abu-abu netral */
         }
 
         #main-container {
             background-color: white;
-            width: 210mm;
-            min-height: 297mm;
-            /* Simulasi kertas A4 di layar */
+            width: 275mm;
+            min-height: 180mm;
             margin: 20px auto;
-            padding: 20mm;
+            padding: 12mm;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .sans {
-            font-family: Arial, Helvetica, sans-serif;
         }
 
         .nav-floating {
@@ -106,154 +62,341 @@
 
 <body class="bg-gray-100 text-black">
 
-    {{-- Tombol Navigasi Terapung (Hanya Muncul di Layar) --}}
+@php
+if (!function_exists('terbilang_rupiah_scan')) {
+    function terbilang_rupiah_scan($angka) {
+        $angka = abs((float)$angka);
+        $baca = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
+        $terbilang = "";
+        if ($angka < 12) {
+            $terbilang = " " . $baca[(int)$angka];
+        } else if ($angka < 20) {
+            $terbilang = terbilang_rupiah_scan($angka - 10) . " belas";
+        } else if ($angka < 100) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 10)) . " puluh" . terbilang_rupiah_scan(fmod($angka, 10));
+        } else if ($angka < 200) {
+            $terbilang = " seratus" . terbilang_rupiah_scan($angka - 100);
+        } else if ($angka < 1000) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 100)) . " ratus" . terbilang_rupiah_scan(fmod($angka, 100));
+        } else if ($angka < 2000) {
+            $terbilang = " seribu" . terbilang_rupiah_scan($angka - 1000);
+        } else if ($angka < 1000000) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 1000)) . " ribu" . terbilang_rupiah_scan(fmod($angka, 1000));
+        } else if ($angka < 1000000000) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 1000000)) . " juta" . terbilang_rupiah_scan(fmod($angka, 1000000));
+        } else if ($angka < 1000000000000) {
+            $terbilang = terbilang_rupiah_scan(floor($angka / 1000000000)) . " milyar" . terbilang_rupiah_scan(fmod($angka, 1000000000));
+        }
+        return ucfirst(trim($terbilang));
+    }
+}
+@endphp
+
     <div class="nav-floating no-print">
-        <button onclick="printWithHeader()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg flex items-center gap-2 transition">
-            <span>🖨️</span> Cetak Normal
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg flex items-center gap-2 transition cursor-pointer">
+            <span>🖨️</span> Cetak Invoice
         </button>
-        <button onclick="printWithoutHeader()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded shadow-lg flex items-center gap-2 transition">
-            <span>📄</span> Tanpa Kop Surat
-        </button>
-        <button onclick="window.close()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded shadow-lg transition">
+        <button onclick="window.close()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded shadow-lg transition cursor-pointer">
             Tutup
         </button>
     </div>
 
-    <div id="main-container" class="max-w-[21cm] mx-auto bg-white shadow-xl my-10 p-10 print:shadow-none print:my-0">
+    <div id="main-container" class="bg-white text-black font-sans text-[11px]">
 
-        {{-- HEADER KOP SURAT --}}
-        <header class="w-full mb-6 invoice-header">
-            <div class="w-full">
-                <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat" class="w-full h-auto">
-            </div>
-        </header>
-
-        <section class="mt-8 flex justify-between text-sm sans">
-            <div class="w-1/2">
-                <p class="font-bold mb-1">TO:</p>
-                <p class="font-bold text-lg uppercase">{{ $invoice->nama_klien }}</p>
-
-                @if($invoice->offer && $invoice->offer->client_details)
-                <p class="text-gray-700">{{ $invoice->offer->client_details }}</p>
-                @endif
-
-                <p class="mt-4 font-bold">Attn:</p>
-                <p>{{ $invoice->nama_klien }}</p>
-            </div>
-            <div class="w-1/2 text-right">
-                <div class="flex justify-end mb-1">
-                    <span class="w-24 text-left font-bold">Tanggal</span>
-                    <span class="text-left">: {{ \Carbon\Carbon::parse($invoice->created_at)->format('d F Y') }}</span>
-                </div>
-
-                {{-- NO INVOICE SESUAI DATABASE (KONSISTEN DENGAN HISTORI) --}}
-                <div class="flex justify-end">
-                    <span class="w-24 text-left font-bold">Invoice No.</span>
-                    <span class="text-left">: {{ $invoice->no_invoice }}</span>
+        {{-- HEADER SECTION --}}
+        <div class="flex justify-between items-start pb-2 gap-2">
+            {{-- Left Header: Logo TSI & Official Company Address --}}
+            <div class="flex items-start gap-3 w-5/12">
+                <img src="{{ asset('images/logo-tasniem.png') }}" alt="TSI Logo" class="h-14 w-auto object-contain shrink-0 mt-0.5">
+                <div class="text-[11px] leading-tight text-black font-medium">
+                    <h2 class="font-bold text-xs text-black">PT. TASNIEM GERAI INSPIRASI</h2>
+                    <p>Komp.Ruko KDA Junction Blok C 8-9</p>
+                    <p>Batam Centre</p>
+                    <p>No. Telp : +62 778 7485999</p>
+                    <p>Email : tgi_team040210@yahoo.com</p>
                 </div>
             </div>
-        </section>
 
-        <section class="mt-8 text-sm">
-            <p class="mb-2">Bersama ini kami sampaikan tagihan untuk:</p>
-            <p><span class="font-medium w-20 inline-block">Project</span>: {{ optional($invoice->offer)->perihal ?? 'Pengecatan dan Supply Cat Jotun Paints' }}</p>
-            @if($invoice->offer && $invoice->offer->client_details)
-            <p><span class="font-medium w-20 inline-block">Alamat</span>: {{ $invoice->offer->client_details }}</p>
-            @endif
+            {{-- Center Header: INVOICE Title --}}
+            <div class="w-2/12 text-center pt-2">
+                <h1 class="text-xl font-bold tracking-wider uppercase underline">INVOICE</h1>
+            </div>
 
-            <table class="w-full mt-4 border-collapse border border-black">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="border border-black p-2 text-left font-semibold">No.</th>
-                        <th class="border border-black p-2 text-left font-semibold">Keterangan</th>
-                        <th class="border border-black p-2 text-right font-semibold">Total</th>
+            {{-- Right Header: Logo Jotun --}}
+            <div class="w-5/12 flex justify-end items-start">
+                <img src="{{ asset('images/logo-jotun.png') }}" alt="Jotun Logo" class="h-12 w-auto object-contain">
+            </div>
+        </div>
+
+        {{-- META INFO SECTION --}}
+        <div class="grid grid-cols-2 gap-4 my-3 text-[11px] font-sans">
+            {{-- Left Side: Invoice No & Tanggal --}}
+            <div class="space-y-0.5">
+                <div class="flex">
+                    <span class="w-24 font-bold uppercase">INVOICE NO</span>
+                    <span class="font-semibold">: {{ $invoice->no_invoice }}</span>
+                </div>
+                <div class="flex">
+                    <span class="w-24 font-bold uppercase">TANGGAL</span>
+                    <span>: {{ \Carbon\Carbon::parse($invoice->created_at)->format('d F Y') }}</span>
+                </div>
+            </div>
+
+            {{-- Right Side: Kepada, Telepon, Sales --}}
+            <div class="space-y-0.5 pl-8">
+                <div class="flex items-start">
+                    <span class="w-16 font-bold shrink-0">Kepada</span>
+                    <div class="font-bold text-black uppercase leading-tight">
+                        : {{ strtoupper($invoice->nama_klien) }}
+                        @if($invoice->offer && $invoice->offer->client_details)
+                        <div class="font-normal text-[11px] text-gray-800 uppercase leading-tight mt-0.5">{{ $invoice->offer->client_details }}</div>
+                        @endif
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-16 font-bold shrink-0">Telepon</span>
+                    <span>: -</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-16 font-bold shrink-0">Sales</span>
+                    <span class="font-bold">: YASRI</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- MAIN TABLE --}}
+        <div class="my-3">
+            <table class="w-full text-[11px] border-collapse">
+                <thead>
+                    <tr class="border-t border-b border-black font-bold text-black uppercase">
+                        <th class="py-1.5 px-1 text-center w-8">NO</th>
+                        <th class="py-1.5 px-2 text-left">NAMA BARANG</th>
+                        <th class="py-1.5 px-2 text-center w-24">JUMLAH</th>
+                        <th class="py-1.5 px-2 text-center w-16">BONUS</th>
+                        <th class="py-1.5 px-2 text-right w-24">@HARGA</th>
+                        <th class="py-1.5 px-2 text-right w-24">HARGA</th>
+                        <th class="py-1.5 px-2 text-center w-20">DISCOUNT</th>
+                        <th class="py-1.5 px-2 text-right w-28">TOTAL</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td class="border border-black p-2 text-center">1</td>
-                        <td class="border border-black p-2">Total Pengecatan (sesuai Penawaran)</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
-                    </tr>
+                <tbody class="divide-y divide-gray-100">
+                    @php $rowCounter = 1; @endphp
+                    @if(!empty($invoice->tampilkan_comp_b) && $invoice->offer && $invoice->offer->items->isNotEmpty())
+                        @foreach($invoice->offer->items as $item)
+                            @php
+                                $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
+                                $packing = $item->packing_size ?? '';
+                                $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
+                                $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
+                                $rowTotal = $consumption * $priceL;
+                                $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
 
-                    @foreach($invoice->additions as $index => $addition)
-                    <tr>
-                        <td class="border border-black p-2 text-center">{{ $index + 2 }}</td>
-                        <td class="border border-black p-2">{{ $addition->nama_pekerjaan }}</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($addition->harga, 0, ',', '.') }}</td>
-                    </tr>
-                    @endforeach
+                                $namaCompA = $item->nama_produk;
+                                if ($compB && !str_contains(strtoupper($namaCompA), 'CPA')) {
+                                    $namaCompA .= ' CPA';
+                                }
+                                $namaCompB = $compB;
+                                if ($compB && !str_contains(strtoupper($namaCompB), 'CPB')) {
+                                    $namaCompB .= ' CPB';
+                                }
+                            @endphp
 
-                    <tr>
-                        <td class="border border-black p-2 h-8"></td>
-                        <td class="border border-black p-2"></td>
-                        <td class="border border-black p-2"></td>
-                    </tr>
-
-                    <tr class="font-medium">
-                        <td colspan="2" class="border border-black p-2 text-right">TOTAL</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($invoice->total_penawaran + $invoice->total_tambahan, 0, ',', '.') }}</td>
-                    </tr>
-
-                    @if($invoice->diskon > 0)
-                    <tr class="font-medium">
-                        <td colspan="2" class="border border-black p-2 text-right">Diskon</td>
-                        <td class="border border-black p-2 text-right text-red-600">- Rp {{ number_format($invoice->diskon, 0, ',', '.') }}</td>
-                    </tr>
+                            @if(!empty($compB))
+                                @php
+                                    $compB_subtotal = round($rowTotal * 0.09);
+                                    $compA_subtotal = $rowTotal - $compB_subtotal;
+                                    $compB_price = round($priceL * 0.09);
+                                    $compA_price = $priceL - $compB_price;
+                                @endphp
+                                {{-- Row 1: Comp A --}}
+                                <tr class="align-top">
+                                    <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-1.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($namaCompA) }}</span>
+                                            <span class="font-normal text-[10px] pr-2">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-1.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-1.5 px-2 text-center"></td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($compA_price, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($compA_subtotal, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                                    <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($compA_subtotal, 0, ',', '.') }}</td>
+                                </tr>
+                                {{-- Row 2: Comp B --}}
+                                <tr class="align-top">
+                                    <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-1.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($namaCompB) }}</span>
+                                            <span class="font-normal text-[10px] pr-2">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-1.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-1.5 px-2 text-center"></td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($compB_price, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($compB_subtotal, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                                    <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($compB_subtotal, 0, ',', '.') }}</td>
+                                </tr>
+                            @else
+                                <tr class="align-top">
+                                    <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                    <td class="py-1.5 px-2">
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span>{{ strtoupper($item->nama_produk) }}</span>
+                                            <span class="font-normal text-[10px] pr-2">{{ $packing }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-1.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-1.5 px-2 text-center"></td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($priceL, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-right">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                                    <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                                    <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    @elseif($invoice->offer && $invoice->offer->items->isNotEmpty())
+                        @foreach($invoice->offer->items as $item)
+                            @php
+                                $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
+                                $packing = $item->packing_size ?? '';
+                                $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
+                                $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
+                                $rowTotal = $consumption * $priceL;
+                            @endphp
+                            <tr class="align-top">
+                                <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                                <td class="py-1.5 px-2">
+                                    <div class="flex justify-between items-center font-bold">
+                                        <span>{{ strtoupper($item->nama_produk) }}</span>
+                                        <span class="font-normal text-[10px] pr-2">{{ $packing }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-1.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
+                                <td class="py-1.5 px-2 text-center"></td>
+                                <td class="py-1.5 px-2 text-right">{{ number_format($priceL, 0, ',', '.') }}</td>
+                                <td class="py-1.5 px-2 text-right">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                                <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                                <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr class="align-top">
+                            <td class="py-1.5 px-1 text-center font-semibold">1.</td>
+                            <td class="py-1.5 px-2 font-bold">{{ strtoupper(optional($invoice->offer)->perihal ?? 'Total Pekerjaan / Supply Cat (sesuai Penawaran)') }}</td>
+                            <td class="py-1.5 px-2 text-center font-semibold">1 PAKET</td>
+                            <td class="py-1.5 px-2 text-center"></td>
+                            <td class="py-1.5 px-2 text-right">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
+                            <td class="py-1.5 px-2 text-right">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
+                            <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                            <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
+                        </tr>
                     @endif
 
-                    <tr class="font-bold bg-gray-100">
-                        <td colspan="2" class="border border-black p-2 text-right">TOTAL TAGIHAN</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($invoice->grand_total, 0, ',', '.') }}</td>
-                    </tr>
-
-                    @foreach($invoice->payments as $payment)
-                    <tr class="font-medium text-gray-600">
-                        <td colspan="2" class="border border-black p-2 text-right">{{ $payment->keterangan }}</td>
-                        <td class="border border-black p-2 text-right text-green-600">- Rp {{ number_format($payment->jumlah, 0, ',', '.') }}</td>
+                    {{-- Pekerjaan Tambahan --}}
+                    @foreach($invoice->additions as $addition)
+                    <tr class="align-top">
+                        <td class="py-1.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
+                        <td class="py-1.5 px-2 font-bold">{{ strtoupper($addition->nama_pekerjaan) }}</td>
+                        <td class="py-1.5 px-2 text-center font-semibold">1 Ls</td>
+                        <td class="py-1.5 px-2 text-center"></td>
+                        <td class="py-1.5 px-2 text-right">{{ number_format($addition->harga, 0, ',', '.') }}</td>
+                        <td class="py-1.5 px-2 text-right">{{ number_format($addition->harga, 0, ',', '.') }}</td>
+                        <td class="py-1.5 px-2 text-center">- &nbsp; 0.00%</td>
+                        <td class="py-1.5 px-2 text-right font-semibold">{{ number_format($addition->harga, 0, ',', '.') }}</td>
                     </tr>
                     @endforeach
-
-                    <tr class="font-bold text-xl bg-gray-200">
-                        <td colspan="2" class="border border-black p-2 text-right">SISA PEMBAYARAN</td>
-                        <td class="border border-black p-2 text-right">Rp {{ number_format($invoice->sisa_pembayaran, 0, ',', '.') }}</td>
-                    </tr>
                 </tbody>
             </table>
-        </section>
+            <div class="border-b border-black w-full mt-0.5"></div>
+        </div>
 
-        <section class="mt-12 flex justify-between text-sm">
-            <div class="text-center">
-                <p>Hormat kami,</p>
-                <p>PT. Tasniem Gerai Inspirasi</p>
-                <div class="h-28 w-48 relative">
-                    <img src="{{ asset('images/ttd.png') }}" alt="Logo & Tanda Tangan" class="h-28 opacity-100 mx-auto">
+        {{-- SUMMARY & NOTES SECTION --}}
+        <div class="grid grid-cols-12 gap-4 text-[11px] font-sans my-3">
+            {{-- Left Column: Credit Term, Catatan, Terbilang, Printed By --}}
+            <div class="col-span-7 space-y-1 pr-4">
+                <div class="flex items-center gap-8">
+                    <div><span class="font-bold uppercase">CREDIT TERM :</span> 0 hari</div>
+                    <div><span class="font-bold uppercase">JATUH TEMPO :</span> {{ \Carbon\Carbon::parse($invoice->created_at)->format('d F Y') }}</div>
                 </div>
-                <p class="font-bold text-gray-800">SAMSU RIZAL</p>
-                <p class="text-gray-600">General Manager</p>
+
+                <div>
+                    <span class="font-bold">Catatan :</span> {{ strtoupper($invoice->nama_klien) }} {{ $invoice->offer && $invoice->offer->client_details ? '- ' . strtoupper($invoice->offer->client_details) : '' }}
+                </div>
+
+                <div>
+                    <span class="font-bold">Terbilang :</span> {{ terbilang_rupiah_scan($invoice->grand_total) }} rupiah
+                </div>
+
+                <div class="text-[10px] text-black pt-0.5">
+                    <span class="font-bold">Printed By :</span> Admin, {{ date('H:i:s, l, d F Y') }}
+                </div>
             </div>
-            <div class="text-left">
-                <p class="font-medium">Pembayaran melalui Bank:</p>
-                <p>a/n PT. Tasniem Gerai Inspirasi</p>
-                <p>Bank BRI Cab. Nagoya</p>
-                <p>Rek. No. 0331 - 0100 1817 306</p>
+
+            {{-- Right Column: TOTAL, DISCOUNT, PPN, GRAND TOTAL --}}
+            <div class="col-span-5 text-right space-y-1 font-medium">
+                <div class="flex justify-between">
+                    <span class="font-bold">TOTAL</span>
+                    <span>: IDR {{ number_format($invoice->total_penawaran + $invoice->total_tambahan, 0, ',', '.') }}</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="font-bold">DISCOUNT</span>
+                    <span>: IDR {{ $invoice->diskon > 0 ? '- ' . number_format($invoice->diskon, 0, ',', '.') : '-' }}</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="font-bold">PPN</span>
+                    <span>: IDR -</span>
+                </div>
+
+                <div class="border-t border-black my-0.5"></div>
+
+                <div class="flex justify-between text-xs font-bold">
+                    <span class="font-bold">GRAND TOTAL</span>
+                    <span>: IDR {{ number_format($invoice->grand_total, 0, ',', '.') }}</span>
+                </div>
+
+                @if($invoice->payments && $invoice->payments->count() > 0)
+                    @foreach($invoice->payments as $payment)
+                    <div class="flex justify-between">
+                        <span class="font-semibold">{{ strtoupper($payment->keterangan) }}</span>
+                        <span>: IDR - {{ number_format($payment->jumlah, 0, ',', '.') }}</span>
+                    </div>
+                    @endforeach
+                    <div class="flex justify-between text-xs font-bold text-blue-900">
+                        <span class="font-bold">SISA PEMBAYARAN</span>
+                        <span>: IDR {{ number_format($invoice->sisa_pembayaran, 0, ',', '.') }}</span>
+                    </div>
+                @endif
             </div>
-        </section>
+        </div>
+
+        {{-- SIGNATURE SECTION (4 Columns with Solid Horizontal Line at Bottom - NO STAMP / NO IMAGE) --}}
+        <div class="mt-16 grid grid-cols-4 text-center text-[11px] font-sans gap-8">
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Yang Menerima,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Kepala Gudang,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Supir/Helper,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+            <div class="flex flex-col justify-between h-20">
+                <p class="font-normal text-black">Hormat kami,</p>
+                <div class="border-b border-black w-full"></div>
+            </div>
+        </div>
+
     </div>
 
-    <script>
-        // Fungsi Cetak Normal
-        function printWithHeader() {
-            document.body.classList.remove('hide-header-on-print');
-            window.print();
-        }
-
-        // Fungsi Cetak Tanpa Kop
-        function printWithoutHeader() {
-            document.body.classList.add('hide-header-on-print');
-            window.print();
-        }
-    </script>
 </body>
 
 </html>
