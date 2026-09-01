@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 max-w-7xl">
+<div class="container mx-auto px-4 max-w-[96%]">
     {{-- Header Page --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
@@ -24,10 +24,28 @@
     </div>
 
     {{-- Alert Messages --}}
+    @if (session('success'))
+    <div class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-xl shadow-sm">
+        <p class="font-bold">Berhasil</p>
+        <p class="text-sm">{{ session('success') }}</p>
+    </div>
+    @endif
+
     @if (session('error'))
     <div class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-xl shadow-sm">
         <p class="font-bold">Gagal Menyimpan</p>
         <p class="text-sm">{{ session('error') }}</p>
+    </div>
+    @endif
+
+    @if ($errors->any())
+    <div class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-xl shadow-sm">
+        <p class="font-bold">Terjadi Kesalahan Validasi:</p>
+        <ul class="list-disc pl-5 mt-1 text-sm space-y-1">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
     @endif
 
@@ -129,8 +147,8 @@
         </div>
 
         {{-- Card 2: Rincian Produk Quotation --}}
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-200/80 p-6 md:p-8 mb-8">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-3 border-b border-slate-100 gap-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200/80 p-6 md:p-10 mb-10 min-h-[500px]">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-4 border-b border-slate-100 gap-4">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                         <span class="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
@@ -163,13 +181,13 @@
                     <thead>
                         <tr class="bg-slate-100/80 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
                             <th class="p-3 rounded-l-xl w-8 text-center">#</th>
-                            <th class="p-3 min-w-[200px]">Pilih Produk</th>
+                            <th class="p-3 min-w-[320px]">Pilih Produk</th>
                             <th class="p-3 min-w-[110px]">Packing Size</th>
                             <th class="p-3 min-w-[90px] text-center">Qty Order</th>
                             <th class="p-3 min-w-[100px] text-right">Consumption (L)</th>
-                            <th class="p-3 min-w-[130px]">Status</th>
+                            <th class="p-3 min-w-[160px]">Status</th>
                             <th class="p-3 min-w-[130px] text-right">Harga Normal / L</th>
-                            <th class="p-3 min-w-[85px] text-center">Up (%)</th>
+                            <th class="p-3 min-w-[120px] text-center">Up (%)</th>
                             <th class="p-3 min-w-[140px] text-right">Harga Setelah Up / L</th>
                             <th class="p-3 min-w-[130px] text-right">Subtotal (Rp)</th>
                             <th class="p-3 rounded-r-xl w-10 text-center">Aksi</th>
@@ -316,21 +334,32 @@
 <style>
     .ts-control {
         border-radius: 0.75rem !important;
-        padding: 0.75rem 1rem !important;
+        padding: 0.625rem 0.75rem !important; /* py-2.5 px-3 equivalent */
         border-color: #cbd5e1 !important;
-        font-size: 0.875rem !important;
-        font-weight: 500 !important;
+        font-size: 0.75rem !important; /* text-xs */
+        font-weight: 600 !important; /* font-semibold */
         color: #1e293b !important;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        min-height: 42px !important;
     }
     .ts-wrapper.single .ts-control {
         background-color: #ffffff !important;
+        display: flex !important;
+        align-items: center;
+    }
+    .ts-wrapper.single .ts-control .item {
+        white-space: normal !important;
+        word-break: break-word !important;
+        display: block !important;
+        line-height: 1.5;
+        margin-top: 2px;
+        margin-bottom: 2px;
     }
     .ts-dropdown {
         border-radius: 0.75rem !important;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
         border-color: #cbd5e1 !important;
-        font-size: 0.875rem !important;
+        font-size: 0.75rem !important;
     }
 </style>
 
@@ -609,28 +638,64 @@
             const inpPrice = tr.querySelector('.inp-price');
             const btnDelete = tr.querySelector('.btn-delete-row');
 
-            // Product Select Change Listener (Auto fill Base Price & Calculate Up Price)
-            selProduct.addEventListener('change', function() {
-                const opt = selProduct.options[selProduct.selectedIndex];
-                if (opt.value) {
-                    const prodObj = registeredProducts.find(p => p.id == opt.value);
-                    inpNama.value = opt.dataset.nama || opt.text;
+            // Inisialisasi TomSelect atau fallback event listener
+            if (window.TomSelect && selProduct) {
+                new TomSelect(selProduct, {
+                    create: true, // Allow manual typing
+                    placeholder: '-- Ketik / Cari Nama Produk --',
+                    allowEmptyOption: true,
+                    onChange: function(value) {
+                        if (value) {
+                            const prodObj = registeredProducts.find(p => p.id == value);
+                            if (prodObj) {
+                                inpNama.value = prodObj.nama_produk;
+                                updatePackingOptions(tr, prodObj);
+                                let basePrice = parseFloat(prodObj.price_per_l || prodObj.harga || 0);
+                                inpBasePrice.value = basePrice;
+                            } else {
+                                // Manual product input
+                                inpNama.value = value;
+                                updatePackingOptions(tr, null);
+                                inpBasePrice.value = 0;
+                            }
 
-                    updatePackingOptions(tr, prodObj);
+                            let basePrice = parseFloat(inpBasePrice.value) || 0;
+                            let upPct = parseFloat(inpUpPercent.value) || 40;
+                            let markedUpPrice = Math.round(basePrice * (1 + (upPct / 100)));
+                            inpPrice.value = markedUpPrice;
+                        } else {
+                            updatePackingOptions(tr, null);
+                            inpBasePrice.value = 0;
+                            inpPrice.value = 0;
+                            inpNama.value = '';
+                        }
+                        recalculateRow(tr);
+                    }
+                });
+            } else {
+                // Fallback Product Select Change Listener
+                selProduct.addEventListener('change', function() {
+                    const opt = selProduct.options[selProduct.selectedIndex];
+                    if (opt.value) {
+                        const prodObj = registeredProducts.find(p => p.id == opt.value);
+                        inpNama.value = opt.dataset.nama || opt.text;
 
-                    let basePrice = parseFloat(opt.dataset.price || 0);
-                    inpBasePrice.value = basePrice;
-                    let upPct = parseFloat(inpUpPercent.value) || 40;
-                    let markedUpPrice = Math.round(basePrice * (1 + (upPct / 100)));
-                    inpPrice.value = markedUpPrice;
-                } else {
-                    updatePackingOptions(tr, null);
-                    inpBasePrice.value = 0;
-                    inpPrice.value = 0;
-                    inpNama.value = '';
-                }
-                recalculateRow(tr);
-            });
+                        updatePackingOptions(tr, prodObj);
+
+                        let basePrice = parseFloat(opt.dataset.price || 0);
+                        inpBasePrice.value = basePrice;
+                        let upPct = parseFloat(inpUpPercent.value) || 40;
+                        let markedUpPrice = Math.round(basePrice * (1 + (upPct / 100)));
+                        inpPrice.value = markedUpPrice;
+                    } else {
+                        updatePackingOptions(tr, null);
+                        inpBasePrice.value = 0;
+                        inpPrice.value = 0;
+                        inpNama.value = '';
+                    }
+                    recalculateRow(tr);
+                });
+            }
 
             // Base price change listener
             if (inpBasePrice) {
@@ -698,11 +763,22 @@
                 let prodObj = null;
                 if (initialData.product_id) {
                     selProduct.value = initialData.product_id;
+                    if (selProduct.tomselect) selProduct.tomselect.setValue(initialData.product_id, true);
                     prodObj = registeredProducts.find(p => p.id == initialData.product_id);
                 } else if (initialData.nama_produk) {
                     prodObj = registeredProducts.find(p => p.nama_produk.toLowerCase() === initialData.nama_produk.toLowerCase());
                     if (prodObj) {
                         selProduct.value = prodObj.id;
+                        if (selProduct.tomselect) selProduct.tomselect.setValue(prodObj.id, true);
+                    } else {
+                        // Manual input that doesn't match registered products
+                        if (selProduct.tomselect) {
+                            selProduct.tomselect.addOption({value: initialData.nama_produk, text: initialData.nama_produk});
+                            selProduct.tomselect.setValue(initialData.nama_produk, true);
+                        } else {
+                            const opt = new Option(initialData.nama_produk, initialData.nama_produk, true, true);
+                            selProduct.add(opt);
+                        }
                     }
                 }
 
@@ -885,6 +961,26 @@
                     clientSelect.focus();
                     return false;
                 }
+
+                // Hapus baris produk yang masih kosong agar tidak memicu error validasi backend
+                const rows = tbody.querySelectorAll('.row-item');
+                let validRowCount = 0;
+                rows.forEach(tr => {
+                    const sel = tr.querySelector('.sel-product');
+                    const inpNama = tr.querySelector('.inp-nama');
+                    if (!sel.value || !sel.value.trim()) {
+                        tr.remove(); // Hapus baris dari DOM
+                    } else {
+                        validRowCount++;
+                    }
+                });
+
+                if (validRowCount === 0) {
+                    e.preventDefault();
+                    alert('Silakan tambahkan setidaknya 1 produk!');
+                    createRow(); // Kembalikan 1 baris kosong
+                    return false;
+                }
             });
         }
 
@@ -894,6 +990,7 @@
                 createRow(item);
             });
         } else {
+            createRow();
             createRow();
         }
     });

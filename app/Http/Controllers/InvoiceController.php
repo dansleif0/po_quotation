@@ -254,6 +254,13 @@ class InvoiceController extends Controller
             }
         }
 
+        // 4. Update keterangan pada masing-masing produk penawaran
+        if ($request->has('item_keterangan') && is_array($request->item_keterangan)) {
+            foreach ($request->item_keterangan as $itemId => $ket) {
+                \App\Models\OfferItem::where('id', $itemId)->update(['keterangan' => $ket]);
+            }
+        }
+
         // Alihkan ke halaman show invoice dengan pesan sukses
         return redirect()->route('invoice.show', $invoice->id)->with('success', 'Invoice berhasil diperbarui!');
     }
@@ -283,5 +290,47 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::with(['offer.items', 'offer.jasaItems', 'additions', 'payments'])->findOrFail($id);
         return view('invoice.print_both', compact('invoice'));
+    }
+
+    public function togglePaid(Request $request, Invoice $invoice)
+    {
+        $invoice->update([
+            'is_paid' => $request->has('is_paid')
+        ]);
+
+        return redirect()->back()->with('success', 'Status lunas invoice berhasil diperbarui!');
+    }
+
+    public function addPayment(Request $request, $id)
+    {
+        $request->validate([
+            'paid_amount' => 'required|numeric|min:0',
+            'payment_receipt' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+        ]);
+
+        $invoice = Invoice::with('paymentTransactions')->findOrFail($id);
+        
+        $path = null;
+        if ($request->hasFile('payment_receipt')) {
+            $path = $request->file('payment_receipt')->store('payments', 'public');
+        }
+
+        $invoice->paymentTransactions()->create([
+            'amount' => $request->paid_amount,
+            'payment_receipt' => $path,
+        ]);
+
+        $invoice->paid_amount += $request->paid_amount;
+        
+        // Sisa yang harus dibayar setelah potong DP
+        $targetToPay = $invoice->grand_total - $invoice->total_dp;
+        
+        if ($invoice->paid_amount >= $targetToPay) {
+            $invoice->is_paid = true;
+        }
+
+        $invoice->save();
+
+        return redirect()->route('invoice.histori')->with('success', 'Pembayaran berhasil ditambahkan!');
     }
 }

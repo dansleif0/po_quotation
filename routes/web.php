@@ -12,6 +12,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RecapController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\PoController;
+use App\Http\Controllers\SoaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,7 @@ Route::middleware(['auth'])->group(function () {
     // --- INVOICE ---
     Route::prefix('invoice')->name('invoice.')->group(function () {
         Route::get('/histori', [InvoiceController::class, 'index'])->name('histori');
+        Route::patch('/toggle-paid/{invoice}', [InvoiceController::class, 'togglePaid'])->name('toggle_paid');
         Route::get('/create', [InvoiceController::class, 'create'])->name('create');
         Route::get('/create-from-offer/{offer}', [InvoiceController::class, 'createFromOffer'])->name('create_from_offer');
         Route::post('/store-from-offer', [InvoiceController::class, 'storeFromOffer'])->name('store_from_offer');
@@ -104,9 +106,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/edit/{invoice}', [InvoiceController::class, 'edit'])->name('edit');
         Route::put('/update/{invoice}', [InvoiceController::class, 'update'])->name('update');
         Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/payment', [InvoiceController::class, 'addPayment'])->name('payment');
         Route::get('/{id}/print', [InvoiceController::class, 'print'])->name('print');
         Route::get('/{id}/print-surat-jalan', [InvoiceController::class, 'printSuratJalan'])->name('print_surat_jalan');
         Route::get('/{id}/print-both', [InvoiceController::class, 'printBoth'])->name('print_both');
+    });
+
+    // --- SOA ---
+    Route::prefix('soa')->name('soa.')->group(function () {
+        Route::get('/histori', [SoaController::class, 'index'])->name('histori');
+        Route::get('/create', [SoaController::class, 'create'])->name('create');
+        Route::post('/store', [SoaController::class, 'store'])->name('store');
+        Route::get('/print/{id}', [SoaController::class, 'print'])->name('print');
+        Route::delete('/{id}', [SoaController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/payment', [SoaController::class, 'addPayment'])->name('payment');
     });
 
     // --- BAST (Berita Acara Serah Terima) ---

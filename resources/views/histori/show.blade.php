@@ -3,15 +3,18 @@
 @section('content')
 <div class="container mx-auto my-12 px-4">
 
-    <div class="max-w-4xl mx-auto mb-4 flex justify-between gap-2 print:hidden">
-        <a href="{{ route('histori.index') }}" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded hover:bg-gray-300 transition-colors">
-            &larr; Kembali
+    <div class="max-w-4xl mx-auto mb-4 flex justify-between items-center print:hidden">
+        <a href="{{ route('histori.index') }}" class="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-xl transition text-sm">
+            &larr; Kembali ke Histori Quotation
         </a>
-        <div class="flex gap-2">
-            <a href="{{ route('histori.print', $offer->id) }}" target="_blank" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition-colors shadow-sm inline-flex items-center gap-2">
-                🖨️ Print Surat (PDF)
+        <div class="flex gap-3">
+            <a href="{{ route('histori.print', $offer->id) }}" target="_blank" class="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-xl transition shadow-md text-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Cetak / Download PDF
             </a>
-            <a href="{{ route('invoice.create_from_offer', $offer->id) }}" class="bg-gray-800 text-white font-bold py-2 px-4 rounded hover:bg-gray-700 transition-colors shadow-sm">
+            <a href="{{ route('invoice.create_from_offer', $offer->id) }}" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-5 rounded-xl transition shadow-md text-sm cursor-pointer">
                 Buat Invoice &rarr;
             </a>
         </div>

@@ -49,26 +49,65 @@
                 </div>
 
                 <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-600">Rincian Area/Pekerjaan (dari Penawaran)</label>
-                    <div class="border rounded-md mt-1 divide-y divide-gray-200 bg-gray-50">
-                        @foreach($invoice->offer->items as $index => $item)
-                        <div class="p-3 flex justify-between items-center text-sm">
-                                {{ $item->area_dinding ? $item->area_dinding . ' (' . $item->nama_produk . ')' : $item->nama_produk }}
-                            <span class="font-medium">Rp {{ number_format($item->volume * $item->harga_per_m2, 0, ',', '.') }}</span>
-                        </div>
-                        @endforeach
-                        @foreach($invoice->offer->jasaItems as $jasa)
-                         <div class="p-3 flex justify-between items-center text-sm">
-                            <span class="text-gray-700">{{ $jasa->nama_jasa }}</span>
-                            <span class="font-medium">Rp {{ number_format($jasa->harga_jasa, 0, ',', '.') }}</span>
-                        </div>
-                        @endforeach
-                        <div class="p-3 flex justify-between items-center bg-gray-200 font-bold">
-                            <span>Total Penawaran Asli</span>
-                            <!-- ID ini penting untuk JS -->
-                            <input type="hidden" id="offer_total" value="{{ $invoice->total_penawaran }}">
-                            <span>Rp {{ number_format($invoice->total_penawaran, 0, ',', '.') }}</span>
-                        </div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Rincian Barang / Produk Dipesan (dari Penawaran)</label>
+                    <div class="overflow-x-auto border border-gray-200 rounded-xl bg-white shadow-sm">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-700 font-bold uppercase border-b border-gray-200">
+                                    <th class="py-2.5 px-3 w-8 text-center">#</th>
+                                    <th class="py-2.5 px-3">Nama Produk</th>
+                                    <th class="py-2.5 px-3 text-center">Packing Size</th>
+                                    <th class="py-2.5 px-3 text-center">Qty Order</th>
+                                    <th class="py-2.5 px-3 text-right">Consumption (L)</th>
+                                    <th class="py-2.5 px-3 text-right">Harga / L</th>
+                                    <th class="py-2.5 px-3 text-right">Subtotal</th>
+                                    <th class="py-2.5 px-3 min-w-[180px]">Keterangan / Catatan Produk</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach($invoice->offer->items as $index => $item)
+                                @php
+                                    $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
+                                    $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
+                                    $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
+                                    $subtotal = $consumption * $priceL;
+                                @endphp
+                                <tr class="hover:bg-gray-50/80">
+                                    <td class="py-2.5 px-3 text-center font-semibold text-gray-500">{{ $index + 1 }}</td>
+                                    <td class="py-2.5 px-3 font-bold text-gray-900">{{ $item->nama_produk }}</td>
+                                    <td class="py-2.5 px-3 text-center font-medium text-gray-700">{{ $item->packing_size ?: '-' }}</td>
+                                    <td class="py-2.5 px-3 text-center font-bold text-gray-800">{{ number_format($qty, 0) }} CAN</td>
+                                    <td class="py-2.5 px-3 text-right font-bold text-blue-700">{{ number_format($consumption, 1) }} L</td>
+                                    <td class="py-2.5 px-3 text-right text-gray-700">Rp {{ number_format($priceL, 0, ',', '.') }}</td>
+                                    <td class="py-2.5 px-3 text-right font-extrabold text-gray-900">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                                    <td class="py-2.5 px-3">
+                                        <input type="text" name="item_keterangan[{{ $item->id }}]" value="{{ old('item_keterangan.'.$item->id, $item->keterangan ?? '') }}"
+                                            placeholder="Tambah keterangan produk..."
+                                            class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 text-xs font-medium text-gray-800 focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                </tr>
+                                @endforeach
+
+                                @foreach($invoice->offer->jasaItems as $jasa)
+                                <tr class="hover:bg-gray-50/80">
+                                    <td class="py-2.5 px-3 text-center font-semibold text-gray-500">-</td>
+                                    <td class="py-2.5 px-3 font-bold text-gray-900" colspan="5">{{ $jasa->nama_jasa }}</td>
+                                    <td class="py-2.5 px-3 text-right font-extrabold text-gray-900">Rp {{ number_format($jasa->harga_jasa, 0, ',', '.') }}</td>
+                                    <td class="py-2.5 px-3"></td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-gray-100 font-bold border-t border-gray-300 text-gray-900">
+                                    <td colspan="6" class="py-3 px-3 text-right">Total Penawaran Asli:</td>
+                                    <td class="py-3 px-3 text-right font-extrabold text-blue-900">
+                                        <input type="hidden" id="offer_total" value="{{ $invoice->total_penawaran }}">
+                                        Rp {{ number_format($invoice->total_penawaran, 0, ',', '.') }}
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
             </fieldset>

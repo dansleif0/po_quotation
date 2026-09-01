@@ -26,6 +26,17 @@ class Invoice extends Model
         return $this->hasMany(InvoicePayment::class);
     }
 
+    // Relasi ke SOA
+    public function soas() {
+        return $this->belongsToMany(Soa::class, 'invoice_soa')->withPivot('keterangan')->withTimestamps();
+    }
+
+    // Relasi ke transaksi cicilan pembayaran (Installments)
+    public function paymentTransactions()
+    {
+        return $this->morphMany(PaymentTransaction::class, 'payable');
+    }
+
     // URL File PO (Penyimpanan Lokal Public)
     public function getPoFileUrlAttribute()
     {

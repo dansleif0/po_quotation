@@ -28,10 +28,13 @@
 
             #print-paper {
                 width: 100% !important;
+                min-height: auto !important;
+                height: auto !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 box-shadow: none !important;
                 border: none !important;
+                overflow: hidden !important;
             }
         }
 
@@ -85,7 +88,7 @@
     </div>
 
     <div id="print-paper" class="print:m-0 print:p-0 print:shadow-none">
-        
+
         @php
             $tglPo = \Carbon\Carbon::parse($po->tanggal_po);
             $tglStr = $tglPo->format('d - m - Y');
@@ -104,41 +107,41 @@
         </div>
 
         {{-- Grid Supplier, Deliver To & Document Info --}}
-        <div class="grid grid-cols-12 gap-3 mb-4 text-xs">
+        <div class="grid grid-cols-12 gap-3 mb-3 text-[11px]">
             {{-- Box 1: SUPPLIER --}}
-            <div class="col-span-4 border border-black rounded-2xl p-3 min-h-[120px]">
-                <p class="text-center font-bold tracking-widest uppercase mb-2 border-b border-gray-300 pb-1 text-[11px]">S U P P L I E R</p>
-                <p class="font-bold uppercase text-sm">{{ $po->supplier_name ?: 'PT CIPTA MARITIM PERKASA' }}</p>
-                <p class="text-xs mt-1 leading-snug">{{ $po->supplier_address ?: 'Ruko Tunas Regency Blok A5 No 09 – 10 Tanjung Uncang' }}</p>
+            <div class="col-span-4 border border-black rounded-[1rem] p-3 min-h-[100px]">
+                <p class="text-center tracking-[0.2em] mb-2"><span class="border-b border-gray-400 pb-0.5 px-4">S U P P L I E R</span></p>
+                <p class="uppercase text-[11px] mb-0.5">{{ $po->supplier_name ?: 'PT CIPTA MARITIM PERKASA' }}</p>
+                <p class="text-[11px] leading-tight">{{ $po->supplier_address ?: 'Ruko Tunas Regency Blok A5 No 09 – 10 Tanjung Uncang' }}</p>
             </div>
 
             {{-- Box 2: DELIVER TO --}}
-            <div class="col-span-4 border border-black rounded-2xl p-3 min-h-[120px]">
-                <p class="text-center font-bold tracking-widest uppercase mb-2 border-b border-gray-300 pb-1 text-[11px]">D E L I V E R &nbsp; T O</p>
-                <p class="font-bold uppercase text-sm">{{ $po->deliver_to_name ?: 'PT TASNIEM GERAI INSPIRASI' }}</p>
-                <p class="text-xs mt-1 leading-snug">{{ $po->deliver_to_address ?: 'Komp. Ruko KDA Junction Blok C 8-9' }}</p>
+            <div class="col-span-4 border border-black rounded-[1rem] p-3 min-h-[100px]">
+                <p class="text-center tracking-[0.2em] mb-2"><span class="border-b border-gray-400 pb-0.5 px-4">D E L I V E R &nbsp; T O</span></p>
+                <p class="uppercase text-[11px] mb-0.5">{{ $po->deliver_to_name ?: 'PT TASNIEM GERAI INSPIRASI' }}</p>
+                <p class="text-[11px] leading-tight">{{ $po->deliver_to_address ?: 'Komp. Ruko KDA Junction Blok C 8-9' }}</p>
             </div>
 
             {{-- Box 3: Metadata Grid --}}
-            <div class="col-span-4 pl-2 space-y-1.5 text-xs font-bold font-mono">
-                <div class="flex justify-between items-start gap-1">
-                    <span class="font-sans shrink-0">DATE</span>
+            <div class="col-span-4 pl-4 space-y-1.5 text-[11px] font-sans">
+                <div class="flex items-start">
+                    <span class="w-28 shrink-0">DATE</span>
                     <span>: {{ $tglStr }}</span>
                 </div>
-                <div class="flex justify-between items-start gap-1">
-                    <span class="font-sans shrink-0">CURRENCY</span>
+                <div class="flex items-start">
+                    <span class="w-28 shrink-0">CURRENCY</span>
                     <span>: {{ $po->currency ?: 'IDR' }}</span>
                 </div>
-                <div class="flex justify-between items-start gap-1">
-                    <span class="font-sans shrink-0">DELIVERY DATE</span>
+                <div class="flex items-start">
+                    <span class="w-28 shrink-0">DELIVERY DATE</span>
                     <span>: {{ $po->delivery_date ?: '-' }}</span>
                 </div>
-                <div class="flex justify-between items-start gap-1">
-                    <span class="font-sans shrink-0">OFFER LETTER</span>
-                    <span class="text-right font-sans break-all">: {{ $po->offer_letter ?: ($po->offer->no_surat ?? '-') }}</span>
+                <div class="flex items-start">
+                    <span class="w-28 shrink-0">OFFER LETTER</span>
+                    <span class="break-all">: {{ $po->offer_letter ?: ($po->offer->no_surat ?? '-') }}</span>
                 </div>
-                <div class="flex justify-between items-start gap-1">
-                    <span class="font-sans shrink-0">PAYMENT</span>
+                <div class="flex items-start">
+                    <span class="w-28 shrink-0">PAYMENT</span>
                     <span>: {{ $po->payment_term ?: 'BANK TRANSFER' }}</span>
                 </div>
             </div>
@@ -160,17 +163,17 @@
         </div>
 
         {{-- Items Table --}}
-        <div class="mb-4">
-            <table class="w-full text-xs text-black border border-black">
+        <div class="mb-3">
+            <table class="w-full text-[11px] text-black border border-black">
                 <thead>
-                    <tr class="font-bold text-center bg-gray-50">
-                        <th class="w-10 border border-black py-2 px-1">NO</th>
-                        <th class="border border-black py-2 px-2 text-left">Product</th>
-                        <th class="w-24 border border-black py-2 px-1 text-center">Packing<br>Size (L)</th>
-                        <th class="w-20 border border-black py-2 px-1 text-center">Qty<br>Order</th>
-                        <th class="w-28 border border-black py-2 px-1 text-center">Consumption<br>(L)</th>
-                        <th class="w-28 border border-black py-2 px-2 text-right">Price per (L)</th>
-                        <th class="w-32 border border-black py-2 px-2 text-right">Total price</th>
+                    <tr class="font-bold text-center bg-white">
+                        <th class="w-8 border border-black py-1.5 px-1">NO</th>
+                        <th class="border border-black py-1.5 px-2 text-center">Product</th>
+                        <th class="w-20 border border-black py-1.5 px-1 text-center">Packing<br>Size (L)</th>
+                        <th class="w-16 border border-black py-1.5 px-1 text-center">Qty<br>Order</th>
+                        <th class="w-24 border border-black py-1.5 px-1 text-center">Consumption<br>(L)</th>
+                        <th class="w-24 border border-black py-1.5 px-2 text-center">Price per (L)</th>
+                        <th class="w-28 border border-black py-1.5 px-2 text-center">Total price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -180,27 +183,27 @@
                         $calcTotal += $item->total_price;
                     @endphp
                     <tr>
-                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $idx + 1 }}</td>
-                        <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">{{ $item->nama_produk }}</td>
-                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size }}</td>
-                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->qty_order + 0 }}</td>
-                        <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->consumption_l + 0 }}</td>
-                        <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($item->price_per_liter, 0, ',', '.') }}</td>
-                        <td class="text-right border border-black py-1.5 px-2 align-middle font-bold">{{ number_format($item->total_price, 0, ',', '.') }}</td>
+                        <td class="text-center border border-black py-1 px-1 align-middle">{{ $idx + 1 }}</td>
+                        <td class="uppercase border border-black py-1 px-2 align-middle">{{ $item->nama_produk }}</td>
+                        <td class="text-center border border-black py-1 px-1 align-middle">{{ $item->packing_size }}</td>
+                        <td class="text-center border border-black py-1 px-1 align-middle">{{ $item->qty_order + 0 }}</td>
+                        <td class="text-center border border-black py-1 px-1 align-middle">{{ $item->consumption_l + 0 }}</td>
+                        <td class="text-right border border-black py-1 px-2 align-middle">{{ number_format($item->price_per_liter, 0, '.', ',') }}</td>
+                        <td class="text-right border border-black py-1 px-2 align-middle">{{ number_format($item->total_price, 0, '.', ',') }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-4 italic text-gray-500">Tidak ada rincian produk.</td>
+                        <td colspan="7" class="text-center py-3 italic text-gray-500">Tidak ada rincian produk.</td>
                     </tr>
                     @endforelse
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="6" class="border border-black py-2 px-2 text-left font-bold text-xs">
-                            <span class="underline font-bold">Note :</span> Quantity will be adjusted to Jotun standard packing size
+                        <td colspan="6" class="border-0 pt-1.5 pb-0 px-2 text-left text-[11px] font-bold">
+                            <span class="underline">Note :</span> Quantity will be adjusted to Jotun standard packing size
                         </td>
-                        <td class="border border-black py-2 px-2 text-right font-extrabold text-sm">
-                            {{ number_format($po->total_nilai > 0 ? $po->total_nilai : $calcTotal, 0, ',', '.') }}
+                        <td class="border border-black py-1.5 px-2 text-right font-bold text-[12px]">
+                            {{ number_format($po->total_nilai > 0 ? $po->total_nilai : $calcTotal, 0, '.', ',') }}
                         </td>
                     </tr>
                 </tfoot>
@@ -208,11 +211,11 @@
         </div>
 
         {{-- Notes & Signatures Section --}}
-        <div class="grid grid-cols-12 gap-4 mt-6">
+        <div class="grid grid-cols-12 gap-3 mt-3">
             {{-- Left Side: NOTES --}}
-            <div class="col-span-7 text-[10px] space-y-1">
-                <p class="font-bold text-xs tracking-wider uppercase mb-1">NOTES</p>
-                <ol class="list-decimal list-inside space-y-1 text-slate-800 leading-tight">
+            <div class="col-span-7 text-[9px] space-y-0.5 min-w-0">
+                <p class="font-bold text-[10px] tracking-wider uppercase mb-0.5">NOTES</p>
+                <ol class="list-decimal list-inside space-y-0.5 text-slate-900 leading-tight">
                     <li>ITEMS TO BE DELIVERED ACCORDING TO THE SPECIFICATION AGREED AND APPROVED</li>
                     <li>PENALTY OF 5% PER WEEK WILL BE CHARGED UPON LATENESS FROM AGREED DELIVERY</li>
                     <li>PO NUMBER MUST BE STATED ON INVOICE AND DELIVERY ORDER</li>
@@ -224,46 +227,46 @@
             </div>
 
             {{-- Right Side: Signatures (3 Boxes) --}}
-            <div class="col-span-5 grid grid-cols-3 border border-black text-center text-xs">
+            <div class="col-span-5 grid grid-cols-3 border border-black text-center text-[10px] min-w-0">
                 {{-- Box 1: Issued --}}
-                <div class="border-r border-black p-2 flex flex-col justify-between min-h-[140px]">
-                    <p class="font-bold">Issued,</p>
-                    <div class="my-1 flex justify-center">
-                        @if(file_exists(public_path('images/ttd.png')))
-                            <img src="{{ asset('images/ttd.png') }}" alt="Signature" class="h-12 object-contain">
+                <div class="border-r border-black p-1 flex flex-col justify-between min-h-[100px] min-w-0">
+                    <p class="font-bold truncate">Issued,</p>
+                    <div class="my-0.5 flex justify-center">
+                        @if(file_exists(public_path('images/ttd_ardian.png')))
+                            <img src="{{ asset('images/ttd_ardian.png') }}" alt="Signature Ardian" class="h-20 max-w-full object-contain mix-blend-multiply">
                         @else
-                            <div class="h-12"></div>
+                            <div class="h-10"></div>
                         @endif
                     </div>
-                    <div>
-                        <p class="font-bold text-[11px] uppercase border-t border-gray-300 pt-1">{{ $po->issued_by ?: 'Ardian Wijaya Kusuma' }}</p>
-                        <p class="text-[9px] text-gray-600 uppercase mt-0.5">{{ strtoupper($tglPo->translatedFormat('d F Y')) }}</p>
+                    <div class="min-w-0">
+                        <p class="font-bold text-[10px] uppercase border-t border-gray-300 pt-1 leading-none break-words">{{ $po->issued_by ?: 'Ardian Wijaya Kusuma' }}</p>
+                        <p class="text-[8px] text-gray-800 uppercase mt-0.5 truncate">{{ strtoupper($tglPo->translatedFormat('d F Y')) }}</p>
                     </div>
                 </div>
 
                 {{-- Box 2: Approved --}}
-                <div class="border-r border-black p-2 flex flex-col justify-between min-h-[140px]">
-                    <p class="font-bold">Approved,</p>
-                    <div class="my-1 flex justify-center relative">
+                <div class="border-r border-black p-1 flex flex-col justify-between min-h-[100px] min-w-0">
+                    <p class="font-bold truncate">Approved,</p>
+                    <div class="my-0.5 flex justify-center relative">
                         @if(file_exists(public_path('images/ttd.png')))
-                            <img src="{{ asset('images/ttd.png') }}" alt="Signature" class="h-12 object-contain">
+                            <img src="{{ asset('images/ttd.png') }}" alt="Signature" class="h-16 max-w-full object-contain">
                         @else
-                            <div class="h-12"></div>
+                            <div class="h-10"></div>
                         @endif
                     </div>
-                    <div>
-                        <p class="font-bold text-[11px] uppercase border-t border-gray-300 pt-1">{{ $po->approved_by ?: 'Samsu Rizal' }}</p>
-                        <p class="text-[9px] text-gray-600 uppercase mt-0.5">{{ strtoupper($tglPo->translatedFormat('d F Y')) }}</p>
+                    <div class="min-w-0">
+                        <p class="font-bold text-[10px] uppercase border-t border-gray-300 pt-1 leading-none break-words">{{ $po->approved_by ?: 'Samsu Rizal' }}</p>
+                        <p class="text-[8px] text-gray-800 uppercase mt-0.5 truncate">{{ strtoupper($tglPo->translatedFormat('d F Y')) }}</p>
                     </div>
                 </div>
 
                 {{-- Box 3: Verified --}}
-                <div class="p-2 flex flex-col justify-between min-h-[140px]">
-                    <p class="font-bold">Verified,</p>
-                    <div class="my-1 h-12"></div>
-                    <div>
-                        <p class="font-bold text-[11px] uppercase border-t border-gray-300 pt-1">&nbsp;</p>
-                        <p class="text-[9px] text-gray-600 uppercase mt-0.5">&nbsp;</p>
+                <div class="p-1 flex flex-col justify-between min-h-[100px] min-w-0">
+                    <p class="font-bold truncate">Verified,</p>
+                    <div class="my-0.5 h-10"></div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-[10px] uppercase border-t border-gray-300 pt-1 leading-none">&nbsp;</p>
+                        <p class="text-[8px] text-gray-800 uppercase mt-0.5">&nbsp;</p>
                     </div>
                 </div>
             </div>

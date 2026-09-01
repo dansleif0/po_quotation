@@ -29,10 +29,13 @@
 
             #print-paper {
                 width: 100% !important;
+                min-height: auto !important;
+                height: auto !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 box-shadow: none !important;
                 border: none !important;
+                overflow: hidden !important;
             }
 
             table {
@@ -114,58 +117,58 @@
         @endphp
 
         {{-- Official Kop Surat Header --}}
-        <div class="w-full mb-5">
+        <div class="w-full mb-3">
             <img src="{{ asset('images/kopsurat.jpg') }}" alt="Kop Surat PT Tasniem Gerai Inspirasi" class="w-full h-auto object-contain">
         </div>
 
         {{-- Top Header Date & Letter No --}}
-        <div class="text-base mb-5">
+        <div class="text-[13px] mb-3 leading-tight">
             <p>Batam, {{ $tglStr }}</p>
             <p>Nomor. : {{ $noSurat }}</p>
         </div>
 
         {{-- Recipient Information --}}
-        <div class="text-base mb-5">
+        <div class="text-[13px] mb-3 leading-tight">
             <p>Kepada Yth,</p>
-            <p class="font-bold uppercase mt-1.5 text-lg">{{ $offer->nama_klien }}</p>
+            <p class="font-bold uppercase mt-1 text-sm">{{ $offer->nama_klien }}</p>
             @if($offer->client_details)
-                <p class="text-sm text-gray-800 whitespace-pre-line">{{ $offer->client_details }}</p>
+                <p class="text-gray-800 whitespace-pre-line">{{ $offer->client_details }}</p>
             @endif
-            <p class="mt-2">Dengan Hormat,</p>
+            <p class="mt-1.5">Dengan Hormat,</p>
         </div>
 
         {{-- Introduction Body Text --}}
-        <div class="text-base space-y-2.5 mb-5 text-justify">
+        <div class="text-[13px] space-y-1 mb-3 text-justify leading-tight">
             <p>
                 Kami PT. TASNIEM GERAI INSPIRASI adalah dealer resmi resmi PT. JOTUN INDONESIA, didirikan pada tanggal 4 Februari 2010, Konsep Inspirasi Centre pertama di kota Batam dan pertama di Indonesia, website <a href="https://tasniemgroup.com" target="_blank" class="text-blue-700 underline">https://tasniemgroup.com</a>.
             </p>
             <div>
                 <p>Kami PT Tasniem Gerai Inspirasi bergerak di bidang Painting Dan Pekerjaan Sipil lainnya :</p>
-                <ol class="list-decimal list-inside ml-2 space-y-0.5 mt-1">
+                <ol class="list-decimal list-inside ml-2 space-y-0.5 mt-0.5">
                     <li>Pekerjaan pengecatan dan perawatan gedung</li>
                     <li>Pemasangan partisi dan plafon Finising gypsum dan plafon sunda Plafon</li>
                     <li>Pekerjaan Pengecatan Lantai epoxy</li>
                 </ol>
             </div>
-            <div>
+            <div class="pt-1">
                 <p>Dengan ini kami sampaikan penawaran Harga cat Jotun :</p>
                 <p class="font-bold mt-1">Project NO : {{ $offer->project_no ?: 'HYDRATE' }}</p>
             </div>
         </div>
 
         {{-- Quotation Items Table --}}
-        <div class="my-5 overflow-x-auto">
+        <div class="my-3 overflow-x-auto">
             <table class="w-full text-xs text-black border border-black">
                 <thead>
-                    <tr class="bg-gray-100 font-bold text-center">
-                        <th class="w-8 border border-black py-2 px-1">NO</th>
-                        <th class="border border-black py-2 px-2 text-left min-w-[180px]">Product</th>
-                        <th class="w-24 border border-black py-2 px-1 text-center">Packing<br>Size (L)</th>
-                        <th class="w-20 border border-black py-2 px-1 text-center">Qty<br>Order</th>
-                        <th class="w-24 border border-black py-2 px-1 text-center">Consumption<br>(L)</th>
-                        <th class="w-28 border border-black py-2 px-1 text-center">Product</th>
-                        <th class="w-28 border border-black py-2 px-2 text-right">Price per (L)</th>
-                        <th class="w-32 border border-black py-2 px-2 text-right">Total price</th>
+                    <tr class="bg-white font-bold text-center">
+                        <th class="w-8 border border-black py-1 px-1">NO</th>
+                        <th class="border border-black py-1 px-2 text-left min-w-[150px]">Product</th>
+                        <th class="w-20 border border-black py-1 px-1 text-center">Packing<br>Size (L)</th>
+                        <th class="w-16 border border-black py-1 px-1 text-center">Qty<br>Order</th>
+                        <th class="w-24 border border-black py-1 px-1 text-center">Consumption<br>(L)</th>
+                        <th class="w-24 border border-black py-1 px-1 text-center">Product</th>
+                        <th class="w-24 border border-black py-1 px-2 text-right">Price per (L)</th>
+                        <th class="w-28 border border-black py-1 px-2 text-right">Total price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -195,64 +198,64 @@
                         @endphp
                         {{-- Row 1: Main Product (Comp A) --}}
                         <tr>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $rowCounter++ }}</td>
-                            <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $rowCounter++ }}</td>
+                            <td class="font-bold uppercase border border-black py-1 px-2 align-middle">
                                 <div>{{ $item->nama_produk }}</div>
                             </td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
-                            <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
-                            <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($compA_price, 0, ',', '.') }}</td>
-                            <td class="text-right border border-black py-1.5 px-2 align-middle font-semibold">{{ number_format($compA_subtotal, 0, ',', '.') }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $qty + 0 }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $consumption + 0 }}</td>
+                            <td class="text-center uppercase border border-black py-1 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
+                            <td class="text-right border border-black py-1 px-2 align-middle">{{ number_format($compA_price, 0, '.', ',') }}</td>
+                            <td class="text-right border border-black py-1 px-2 align-middle font-semibold">{{ number_format($compA_subtotal, 0, '.', ',') }}</td>
                         </tr>
                         {{-- Row 2: Comp B --}}
                         <tr>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $rowCounter++ }}</td>
-                            <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle text-gray-800">
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $rowCounter++ }}</td>
+                            <td class="font-bold uppercase border border-black py-1 px-2 align-middle text-gray-800">
                                 <div>{{ $compB }}</div>
                             </td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $packingB ?: '-' }}</td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
-                            <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
-                            <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($compB_price, 0, ',', '.') }}</td>
-                            <td class="text-right border border-black py-1.5 px-2 align-middle font-semibold">{{ number_format($compB_subtotal, 0, ',', '.') }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $packingB ?: '-' }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $qty + 0 }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $consumption + 0 }}</td>
+                            <td class="text-center uppercase border border-black py-1 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
+                            <td class="text-right border border-black py-1 px-2 align-middle">{{ number_format($compB_price, 0, '.', ',') }}</td>
+                            <td class="text-right border border-black py-1 px-2 align-middle font-semibold">{{ number_format($compB_subtotal, 0, '.', ',') }}</td>
                         </tr>
                     @else
                         {{-- Single Normal Row --}}
                         <tr>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $rowCounter++ }}</td>
-                            <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle">
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $rowCounter++ }}</td>
+                            <td class="font-bold uppercase border border-black py-1 px-2 align-middle">
                                 <div>{{ $item->nama_produk }}</div>
                             </td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
-                            <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
-                            <td class="text-right border border-black py-1.5 px-2 align-middle">{{ number_format($priceL, 0, ',', '.') }}</td>
-                            <td class="text-right border border-black py-1.5 px-2 align-middle font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $qty + 0 }}</td>
+                            <td class="text-center border border-black py-1 px-1 align-middle">{{ $consumption + 0 }}</td>
+                            <td class="text-center uppercase border border-black py-1 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>
+                            <td class="text-right border border-black py-1 px-2 align-middle">{{ number_format($priceL, 0, '.', ',') }}</td>
+                            <td class="text-right border border-black py-1 px-2 align-middle font-semibold">{{ number_format($rowTotal, 0, '.', ',') }}</td>
                         </tr>
                     @endif
                     @endforeach
                     @if($offer->diskon_global > 0)
                     <tr>
-                        <td colspan="7" class="text-right border border-black py-1.5 px-2 font-bold">Subtotal</td>
-                        <td class="text-right border border-black py-1.5 px-2 font-bold">{{ number_format($sumTotal, 0, ',', '.') }}</td>
+                        <td colspan="7" class="text-right border border-black py-1 px-2 font-bold">Subtotal</td>
+                        <td class="text-right border border-black py-1 px-2 font-bold">{{ number_format($sumTotal, 0, '.', ',') }}</td>
                     </tr>
                     <tr>
-                        <td colspan="7" class="text-right border border-black py-1.5 px-2 font-bold text-red-600">Diskon Global</td>
-                        <td class="text-right border border-black py-1.5 px-2 font-bold text-red-600">- {{ number_format($offer->diskon_global, 0, ',', '.') }}</td>
+                        <td colspan="7" class="text-right border border-black py-1 px-2 font-bold text-red-600">Diskon Global</td>
+                        <td class="text-right border border-black py-1 px-2 font-bold text-red-600">- {{ number_format($offer->diskon_global, 0, '.', ',') }}</td>
                     </tr>
                     @endif
                 </tbody>
                 <tfoot>
                     <tr class="font-bold">
-                        <td colspan="7" class="border border-black py-2 px-2 text-left font-bold text-xs">
-                            Note : Quantity will be adjusted to Jotun standard packing size
+                        <td colspan="7" class="border border-black py-1.5 px-2 text-left font-bold text-xs">
+                            <span class="underline">Note :</span> Quantity will be adjusted to Jotun standard packing size
                         </td>
-                        <td class="border border-black py-2 px-2 text-right font-extrabold text-sm">
-                            {{ number_format($offer->diskon_global > 0 ? max(0, $sumTotal - $offer->diskon_global) : ($offer->total_keseluruhan ?: $sumTotal), 0, ',', '.') }}
+                        <td class="border border-black py-1.5 px-2 text-right font-extrabold text-[13px]">
+                            {{ number_format($offer->diskon_global > 0 ? max(0, $sumTotal - $offer->diskon_global) : ($offer->total_keseluruhan ?: $sumTotal), 0, '.', ',') }}
                         </td>
                     </tr>
                 </tfoot>
@@ -260,7 +263,7 @@
         </div>
 
         {{-- Sales Condition Section --}}
-        <div class="text-sm my-5">
+        <div class="text-[13px] my-3">
             <p class="font-semibold mb-1">Sales Condition :</p>
             <ul class="space-y-0.5 ml-2">
                 <li>- Above Prices are Franco Batam</li>
@@ -276,12 +279,12 @@
         </div>
 
         {{-- Closing Statement --}}
-        <div class="text-base my-5">
+        <div class="text-[13px] my-3">
             <p>Demikianlah surat penawaran ini kami sampaikan, semoga dapat disetujui.</p>
         </div>
 
         {{-- Signature Block --}}
-        <div class="mt-8 flex justify-end text-base">
+        <div class="mt-4 flex justify-end text-[13px]">
             <div class="text-center w-64">
                 <p>Hormat kami,</p>
                 <div class="h-20 flex items-center justify-center my-2">

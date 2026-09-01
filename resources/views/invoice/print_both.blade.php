@@ -11,13 +11,13 @@
     <style>
         @media print {
             @page {
-                size: A4 portrait;
-                margin: 6mm;
+                size: 24.1cm 27.9cm;
+                margin: 0 !important;
             }
 
             body {
-                margin: 0;
-                padding: 0;
+                margin: 0 !important;
+                padding: 0 !important;
                 background-color: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
@@ -28,11 +28,16 @@
             }
 
             #main-container {
-                width: 100% !important;
-                margin: 0 auto !important;
-                padding: 4mm !important;
+                width: 24.1cm !important;
+                height: 27.9cm !important;
+                margin: 0 !important;
+                padding: 6mm 8mm !important;
+                box-sizing: border-box !important;
                 box-shadow: none !important;
                 border: none !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
             }
         }
 
@@ -42,11 +47,14 @@
 
         #main-container {
             background-color: white;
-            width: 210mm;
-            min-height: 297mm;
+            width: 24.1cm;
+            min-height: 27.9cm;
             margin: 15px auto;
-            padding: 8mm;
+            padding: 6mm 8mm;
+            box-sizing: border-box;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
 
         .nav-floating {
@@ -114,7 +122,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
         {{-- ========================================================================= --}}
         {{-- SECTION 1: INVOICE (TOP HALF) --}}
         {{-- ========================================================================= --}}
-        <div class="invoice-section pb-2">
+        <div class="invoice-section pb-2 flex-1 flex flex-col">
             {{-- HEADER SECTION --}}
             <div class="flex justify-between items-start pb-1 gap-2">
                 <div class="flex items-start gap-2.5 w-6/12">
@@ -428,7 +436,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
             </div>
 
             {{-- SIGNATURE SECTION (INVOICE) --}}
-            <div class="mt-8 grid grid-cols-4 text-center text-[10px] font-sans gap-6">
+            <div class="mt-auto grid grid-cols-4 text-center text-[10px] font-sans gap-6">
                 <div class="flex flex-col justify-between h-14">
                     <p class="font-normal text-black">Yang Menerima,</p>
                     <div class="border-b border-black w-full"></div>
@@ -452,13 +460,13 @@ if (!function_exists('terbilang_rupiah_clean')) {
         {{-- ========================================================================= --}}
         {{-- MIDDLE SEPARATOR: CLEAN DASHED LINE (NO TEXT) --}}
         {{-- ========================================================================= --}}
-        <div class="my-4 border-b border-dashed border-gray-400"></div>
+        <div class="my-2 border-b border-dashed border-gray-400 no-print"></div>
 
 
         {{-- ========================================================================= --}}
         {{-- SECTION 2: SURAT JALAN (BOTTOM HALF) --}}
         {{-- ========================================================================= --}}
-        <div class="surat-jalan-section pt-1">
+        <div class="surat-jalan-section pt-1 flex-1 flex flex-col">
             {{-- HEADER SECTION --}}
             <div class="flex justify-between items-start pb-1 gap-2">
                 <div class="w-5/12 leading-snug text-black">
@@ -658,7 +666,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
             </div>
 
             {{-- SIGNATURE SECTION (SURAT JALAN) --}}
-            <div class="mt-8 grid grid-cols-4 text-center text-[10px] font-sans gap-6">
+            <div class="mt-auto grid grid-cols-4 text-center text-[10px] font-sans gap-6">
                 <div class="flex flex-col justify-between h-14">
                     <p class="font-normal text-black">Bag. Administrasi,</p>
                     <div class="border-b border-black w-full"></div>

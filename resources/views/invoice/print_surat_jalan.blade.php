@@ -11,13 +11,13 @@
     <style>
         @media print {
             @page {
-                size: A4 landscape;
-                margin: 8mm;
+                size: 24.1cm 13.95cm;
+                margin: 0 !important;
             }
 
             body {
-                margin: 0;
-                padding: 0;
+                margin: 0 !important;
+                padding: 0 !important;
                 background-color: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
@@ -28,11 +28,16 @@
             }
 
             #main-container {
-                width: 100% !important;
-                margin: 0 auto !important;
-                padding: 8mm !important;
+                width: 24.1cm !important;
+                height: 13.95cm !important;
+                margin: 0 !important;
+                padding: 4mm 8mm !important;
+                box-sizing: border-box !important;
                 box-shadow: none !important;
                 border: none !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
             }
         }
 
@@ -42,11 +47,14 @@
 
         #main-container {
             background-color: white;
-            width: 275mm;
-            min-height: 180mm;
+            width: 24.1cm;
+            min-height: 13.95cm;
             margin: 20px auto;
-            padding: 12mm;
+            padding: 4mm 8mm;
+            box-sizing: border-box;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
 
         .nav-floating {
@@ -267,7 +275,7 @@
         </div>
 
         {{-- NOTES & PRINTED BY SECTION --}}
-        <div class="my-3 text-[11px] font-sans space-y-0.5">
+        <div class="my-1.5 text-[10px] font-sans space-y-0.5">
             <div>
                 <span class="font-bold">Catatan :</span> {{ strtoupper($invoice->nama_klien) }} {{ $invoice->offer && $invoice->offer->client_details ? '- ' . strtoupper($invoice->offer->client_details) : '' }}
             </div>
@@ -277,20 +285,20 @@
         </div>
 
         {{-- SIGNATURE SECTION (4 Columns: Bag. Administrasi, Kepala Gudang, Supir/Helper, Yang Menerima) --}}
-        <div class="mt-20 grid grid-cols-4 text-center text-[11px] font-sans gap-8">
-            <div class="flex flex-col justify-between h-20">
+        <div class="mt-auto grid grid-cols-4 text-center text-[10px] font-sans gap-6">
+            <div class="flex flex-col justify-between h-12">
                 <p class="font-normal text-black">Bag. Administrasi,</p>
                 <div class="border-b border-black w-full"></div>
             </div>
-            <div class="flex flex-col justify-between h-20">
+            <div class="flex flex-col justify-between h-12">
                 <p class="font-normal text-black">Kepala Gudang,</p>
                 <div class="border-b border-black w-full"></div>
             </div>
-            <div class="flex flex-col justify-between h-20">
+            <div class="flex flex-col justify-between h-12">
                 <p class="font-normal text-black">Supir/Helper,</p>
                 <div class="border-b border-black w-full"></div>
             </div>
-            <div class="flex flex-col justify-between h-20">
+            <div class="flex flex-col justify-between h-12">
                 <p class="font-normal text-black">Yang Menerima,</p>
                 <div class="border-b border-black w-full"></div>
             </div>
