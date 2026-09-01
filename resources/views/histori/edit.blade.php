@@ -140,11 +140,11 @@
                         </span>
                         Daftar Produk Quotation
                     </h2>
-                    <p class="text-xs text-amber-600 font-semibold mt-1 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Note: Price per Liter otomatis di-up +40% dari harga dasar produk terdaftar.
+                        Note: Price per Liter otomatis terhitung berdasarkan Harga Normal dan Persen Up yang ditentukan.
                     </p>
                 </div>
 
@@ -162,15 +162,17 @@
                 <table class="w-full text-left text-sm border-collapse" id="itemsTable">
                     <thead>
                         <tr class="bg-slate-100/80 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
-                            <th class="p-3 rounded-l-xl w-10 text-center">#</th>
-                            <th class="p-3 min-w-[220px]">Pilih Produk</th>
-                            <th class="p-3 min-w-[130px]">Packing Size</th>
-                            <th class="p-3 min-w-[100px] text-center">Qty Order</th>
-                            <th class="p-3 min-w-[110px] text-right">Consumption (L)</th>
-                            <th class="p-3 min-w-[160px]">Status</th>
-                            <th class="p-3 min-w-[150px] text-right">Price / L (+40%)</th>
-                            <th class="p-3 min-w-[150px] text-right">Subtotal (Rp)</th>
-                            <th class="p-3 rounded-r-xl w-12 text-center">Aksi</th>
+                            <th class="p-3 rounded-l-xl w-8 text-center">#</th>
+                            <th class="p-3 min-w-[200px]">Pilih Produk</th>
+                            <th class="p-3 min-w-[110px]">Packing Size</th>
+                            <th class="p-3 min-w-[90px] text-center">Qty Order</th>
+                            <th class="p-3 min-w-[100px] text-right">Consumption (L)</th>
+                            <th class="p-3 min-w-[130px]">Status</th>
+                            <th class="p-3 min-w-[130px] text-right">Harga Normal / L</th>
+                            <th class="p-3 min-w-[85px] text-center">Up (%)</th>
+                            <th class="p-3 min-w-[140px] text-right">Harga Setelah Up / L</th>
+                            <th class="p-3 min-w-[130px] text-right">Subtotal (Rp)</th>
+                            <th class="p-3 rounded-r-xl w-10 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="itemsTbody" class="divide-y divide-slate-100">
@@ -560,11 +562,22 @@
                         class="w-full mt-1.5 p-2 rounded-lg border border-slate-300 text-xs text-slate-800 hidden inp-status-other">
                 </td>
 
-                {{-- Price per Liter (+40%) --}}
+                {{-- Harga Normal / L --}}
                 <td class="p-3">
-                    <input type="hidden" name="items[${rowCounter}][base_price_per_liter]" class="inp-base-price" value="0">
-                    <input type="number" min="0" step="any" name="items[${rowCounter}][price_per_liter]" value="0" required
-                        class="w-full p-2.5 rounded-lg border border-slate-300 text-xs text-right font-bold text-blue-700 bg-blue-50/40 focus:ring-2 focus:ring-blue-500 inp-price">
+                    <input type="number" min="0" step="any" name="items[${rowCounter}][base_price_per_liter]" value="0" placeholder="0"
+                        class="w-full p-2.5 rounded-lg border border-slate-300 text-xs text-right font-bold text-slate-700 bg-slate-50 focus:ring-2 focus:ring-blue-500 inp-base-price">
+                </td>
+
+                {{-- Up (%) --}}
+                <td class="p-3">
+                    <input type="number" min="0" max="1000" step="any" name="items[${rowCounter}][up_percent]" value="40" placeholder="40"
+                        class="w-full p-2.5 rounded-lg border border-slate-300 text-xs text-center font-extrabold text-blue-800 bg-blue-50/50 focus:ring-2 focus:ring-blue-500 inp-up-percent">
+                </td>
+
+                {{-- Price per Liter (+Up %) --}}
+                <td class="p-3">
+                    <input type="number" min="0" step="any" name="items[${rowCounter}][price_per_liter]" value="0" placeholder="0" required
+                        class="w-full p-2.5 rounded-lg border border-blue-400 text-xs text-right font-extrabold text-blue-900 bg-blue-50 focus:ring-2 focus:ring-blue-500 inp-price">
                 </td>
 
                 {{-- Subtotal --}}
@@ -592,10 +605,11 @@
             const selStatus = tr.querySelector('.sel-status');
             const inpStatusOther = tr.querySelector('.inp-status-other');
             const inpBasePrice = tr.querySelector('.inp-base-price');
+            const inpUpPercent = tr.querySelector('.inp-up-percent');
             const inpPrice = tr.querySelector('.inp-price');
             const btnDelete = tr.querySelector('.btn-delete-row');
 
-            // Product Select Change Listener (+40% Markup Rule)
+            // Product Select Change Listener (Auto fill Base Price & Calculate Up Price)
             selProduct.addEventListener('change', function() {
                 const opt = selProduct.options[selProduct.selectedIndex];
                 if (opt.value) {
@@ -606,15 +620,50 @@
 
                     let basePrice = parseFloat(opt.dataset.price || 0);
                     inpBasePrice.value = basePrice;
-                    let markedUpPrice = Math.round(basePrice * 1.40);
+                    let upPct = parseFloat(inpUpPercent.value) || 40;
+                    let markedUpPrice = Math.round(basePrice * (1 + (upPct / 100)));
                     inpPrice.value = markedUpPrice;
                 } else {
                     updatePackingOptions(tr, null);
                     inpBasePrice.value = 0;
+                    inpPrice.value = 0;
                     inpNama.value = '';
                 }
                 recalculateRow(tr);
             });
+
+            // Base price change listener
+            if (inpBasePrice) {
+                inpBasePrice.addEventListener('input', function() {
+                    let basePrice = parseFloat(inpBasePrice.value) || 0;
+                    let upPct = parseFloat(inpUpPercent.value) || 0;
+                    inpPrice.value = Math.round(basePrice * (1 + (upPct / 100)));
+                    recalculateRow(tr);
+                });
+            }
+
+            // Up percent change listener
+            if (inpUpPercent) {
+                inpUpPercent.addEventListener('input', function() {
+                    let basePrice = parseFloat(inpBasePrice.value) || 0;
+                    let upPct = parseFloat(inpUpPercent.value) || 0;
+                    inpPrice.value = Math.round(basePrice * (1 + (upPct / 100)));
+                    recalculateRow(tr);
+                });
+            }
+
+            // Price after Up change listener (manual edit of marked up price recalculates Up %)
+            if (inpPrice) {
+                inpPrice.addEventListener('input', function() {
+                    let basePrice = parseFloat(inpBasePrice.value) || 0;
+                    let finalPrice = parseFloat(inpPrice.value) || 0;
+                    if (basePrice > 0) {
+                        let pct = Math.round(((finalPrice / basePrice) - 1) * 100 * 100) / 100;
+                        inpUpPercent.value = pct;
+                    }
+                    recalculateRow(tr);
+                });
+            }
 
             // Status Change Listener
             selStatus.addEventListener('change', function() {
@@ -627,7 +676,7 @@
                 }
             });
 
-            [selPacking, inpQty, inpPrice].forEach(input => {
+            [selPacking, inpQty].forEach(input => {
                 if (input) {
                     input.addEventListener('change', function() { recalculateRow(tr); });
                     input.addEventListener('input', function() { recalculateRow(tr); });
@@ -684,7 +733,15 @@
                 let basePrice = initialData.base_price_per_liter || 0;
                 let priceL = initialData.price_per_liter || initialData.harga_per_m2 || 0;
 
+                let upPct = 40;
+                if (initialData.up_percent !== undefined && initialData.up_percent !== null) {
+                    upPct = parseFloat(initialData.up_percent);
+                } else if (basePrice > 0 && priceL > 0) {
+                    upPct = Math.round(((priceL / basePrice) - 1) * 100 * 100) / 100;
+                }
+
                 inpBasePrice.value = basePrice;
+                inpUpPercent.value = upPct;
                 inpPrice.value = priceL;
             }
 

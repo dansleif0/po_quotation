@@ -82,6 +82,7 @@ class ProductOfferController extends Controller
                     'product_id'         => $prod?->id,
                     'nama_produk'        => $namaProduk, // Simpan string inputan user
                     'comp_b'             => $prod?->comp_b,
+                    'packing_size_b'     => $prod?->packing_size_b,
                     'harga_per_m2'       => $hargaSatuan,
                     'volume'             => $qty,
                     'area_dinding'       => $ukuran,
@@ -168,6 +169,7 @@ class ProductOfferController extends Controller
                     'product_id'         => $prod?->id,
                     'nama_produk'        => $namaProduk,
                     'comp_b'             => $prod?->comp_b,
+                    'packing_size_b'     => $prod?->packing_size_b,
                     'harga_per_m2'       => $hargaSatuan,
                     'volume'             => $qty,
                     'area_dinding'       => $ukuran,

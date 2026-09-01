@@ -92,6 +92,7 @@ class ProductController extends Controller
         $request->validate([
             'nama_produk'    => 'required|string|max:255',
             'comp_b'         => 'nullable|string|max:255',
+            'packing_size_b' => 'nullable|string|max:255',
             'generic'        => 'nullable|string|max:255',
             'primer_topcoat' => 'nullable|string|in:Primer,Topcoat',
             'category'       => 'nullable|string|in:Marine,Marine & PC,PC - Floor Coating',
@@ -120,6 +121,7 @@ class ProductController extends Controller
             $product = Product::create([
                 'nama_produk'    => $request->nama_produk,
                 'comp_b'         => $request->comp_b,
+                'packing_size_b' => $request->packing_size_b,
                 'generic'        => $request->generic,
                 'primer_topcoat' => $request->primer_topcoat,
                 'category'       => $request->category,
@@ -174,6 +176,7 @@ class ProductController extends Controller
         $request->validate([
             'nama_produk'    => 'required|string|max:255',
             'comp_b'         => 'nullable|string|max:255',
+            'packing_size_b' => 'nullable|string|max:255',
             'generic'        => 'nullable|string|max:255',
             'primer_topcoat' => 'nullable|string|in:Primer,Topcoat',
             'category'       => 'nullable|string|in:Marine,Marine & PC,PC - Floor Coating',
@@ -200,6 +203,7 @@ class ProductController extends Controller
             $product->update([
                 'nama_produk'    => $request->nama_produk,
                 'comp_b'         => $request->comp_b,
+                'packing_size_b' => $request->packing_size_b,
                 'generic'        => $request->generic,
                 'primer_topcoat' => $request->primer_topcoat,
                 'category'       => $request->category,

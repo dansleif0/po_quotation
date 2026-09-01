@@ -188,7 +188,15 @@ if (!function_exists('terbilang_rupiah_clean')) {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @php $rowCounter = 1; @endphp
+                        @php
+                            $rowCounter = 1;
+                            $parseNum = function($str) {
+                                if (!$str) return 0;
+                                $str = str_replace(',', '.', (string)$str);
+                                preg_match('/([0-9]+(\.[0-9]+)?)/', $str, $m);
+                                return isset($m[1]) ? (float)$m[1] : 0;
+                            };
+                        @endphp
                         @if(!empty($invoice->tampilkan_comp_b) && $invoice->offer && $invoice->offer->items->isNotEmpty())
                             @foreach($invoice->offer->items as $item)
                                 @php
@@ -197,7 +205,19 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                     $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
                                     $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
                                     $rowTotal = $consumption * $priceL;
-                                    $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
+                                    
+                                    $prod = $item->product ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
+                                    $compB = $item->comp_b ?? $prod?->comp_b;
+                                    $packingB = $prod?->packing_size_b ?? $item->packing_size_b ?? '';
+
+                                    $numTotal = $parseNum($packing);
+                                    $numB = $parseNum($packingB);
+                                    $numA = max(0, $numTotal - $numB);
+                                    $unit = 'L';
+                                    if ($packing && preg_match('/[a-zA-Z]+/', $packing, $uMatch)) {
+                                        $unit = $uMatch[0];
+                                    }
+                                    $packingA = ($numA > 0) ? (rtrim(rtrim(number_format($numA, 2, '.', ''), '0'), '.') . ' ' . $unit) : $packing;
 
                                     $namaCompA = $item->nama_produk;
                                     if ($compB && !str_contains(strtoupper($namaCompA), 'CPA')) {
@@ -213,15 +233,15 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                     @php
                                         $compB_subtotal = round($rowTotal * 0.09);
                                         $compA_subtotal = $rowTotal - $compB_subtotal;
-                                        $compB_price = round($priceL * 0.09);
-                                        $compA_price = $priceL - $compB_price;
+                                        $compB_price = round($compB_subtotal / $qty);
+                                        $compA_price = round($compA_subtotal / $qty);
                                     @endphp
                                     <tr class="align-top">
                                         <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
                                         <td class="py-0.5 px-2">
                                             <div class="flex justify-between items-center font-bold">
                                                 <span>{{ strtoupper($namaCompA) }}</span>
-                                                <span class="font-normal text-[9px] pr-2">{{ $packing }}</span>
+                                                <span class="font-normal text-[9px] pr-2">{{ $packingA }}</span>
                                             </div>
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
@@ -236,7 +256,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                         <td class="py-0.5 px-2">
                                             <div class="flex justify-between items-center font-bold">
                                                 <span>{{ strtoupper($namaCompB) }}</span>
-                                                <span class="font-normal text-[9px] pr-2">{{ $packing }}</span>
+                                                <span class="font-normal text-[9px] pr-2">{{ $packingB }}</span>
                                             </div>
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
@@ -247,6 +267,9 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                         <td class="py-0.5 px-2 text-right font-semibold">{{ number_format($compB_subtotal, 0, ',', '.') }}</td>
                                     </tr>
                                 @else
+                                    @php
+                                        $pricePerCan = $qty > 0 ? round($rowTotal / $qty) : round($priceL * ($numTotal ?: 1));
+                                    @endphp
                                     <tr class="align-top">
                                         <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
                                         <td class="py-0.5 px-2">
@@ -254,10 +277,13 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                                 <span>{{ strtoupper($item->nama_produk) }}</span>
                                                 <span class="font-normal text-[9px] pr-2">{{ $packing }}</span>
                                             </div>
+                                            @if(!empty($item->keterangan))
+                                                <div class="text-[9px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
+                                            @endif
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                         <td class="py-0.5 px-2 text-center"></td>
-                                        <td class="py-0.5 px-2 text-right">{{ number_format($priceL, 0, ',', '.') }}</td>
+                                        <td class="py-0.5 px-2 text-right">{{ number_format($pricePerCan, 0, ',', '.') }}</td>
                                         <td class="py-0.5 px-2 text-right">{{ number_format($rowTotal, 0, ',', '.') }}</td>
                                         <td class="py-0.5 px-2 text-center">- 0.00%</td>
                                         <td class="py-0.5 px-2 text-right font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
@@ -272,6 +298,8 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                     $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
                                     $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
                                     $rowTotal = $consumption * $priceL;
+                                    $numTotal = $parseNum($packing);
+                                    $pricePerCan = $qty > 0 ? round($rowTotal / $qty) : round($priceL * ($numTotal ?: 1));
                                 @endphp
                                 <tr class="align-top">
                                     <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
@@ -280,25 +308,31 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                             <span>{{ strtoupper($item->nama_produk) }}</span>
                                             <span class="font-normal text-[9px] pr-2">{{ $packing }}</span>
                                         </div>
+                                        @if(!empty($item->keterangan))
+                                            <div class="text-[9px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
+                                        @endif
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                     <td class="py-0.5 px-2 text-center"></td>
-                                    <td class="py-0.5 px-2 text-right">{{ number_format($priceL, 0, ',', '.') }}</td>
+                                    <td class="py-0.5 px-2 text-right">{{ number_format($pricePerCan, 0, ',', '.') }}</td>
                                     <td class="py-0.5 px-2 text-right">{{ number_format($rowTotal, 0, ',', '.') }}</td>
                                     <td class="py-0.5 px-2 text-center">- 0.00%</td>
                                     <td class="py-0.5 px-2 text-right font-semibold">{{ number_format($rowTotal, 0, ',', '.') }}</td>
                                 </tr>
                             @endforeach
                         @else
+                            @php
+                                $priceL = $invoice->total_penawaran;
+                            @endphp
                             <tr class="align-top">
                                 <td class="py-0.5 px-1 text-center font-semibold">1.</td>
                                 <td class="py-0.5 px-2 font-bold">{{ strtoupper(optional($invoice->offer)->perihal ?? 'Total Pekerjaan / Supply Cat (sesuai Penawaran)') }}</td>
                                 <td class="py-0.5 px-2 text-center font-semibold">1 PAKET</td>
                                 <td class="py-0.5 px-2 text-center"></td>
-                                <td class="py-0.5 px-2 text-right">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
-                                <td class="py-0.5 px-2 text-right">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
+                                <td class="py-0.5 px-2 text-right">{{ number_format($priceL, 0, ',', '.') }}</td>
+                                <td class="py-0.5 px-2 text-right">{{ number_format($priceL, 0, ',', '.') }}</td>
                                 <td class="py-0.5 px-2 text-center">- 0.00%</td>
-                                <td class="py-0.5 px-2 text-right font-semibold">{{ number_format($invoice->total_penawaran, 0, ',', '.') }}</td>
+                                <td class="py-0.5 px-2 text-right font-semibold">{{ number_format($priceL, 0, ',', '.') }}</td>
                             </tr>
                         @endif
 
@@ -319,6 +353,21 @@ if (!function_exists('terbilang_rupiah_clean')) {
                 <div class="border-b border-black w-full mt-0.5"></div>
             </div>
 
+            @php
+                if ($invoice->offer && $invoice->offer->items->isNotEmpty()) {
+                    $calc_total_penawaran = 0;
+                    foreach($invoice->offer->items as $it) {
+                        $c = $it->consumption_l > 0 ? $it->consumption_l : ($it->volume > 0 ? $it->volume : 1);
+                        $p = $it->price_per_liter > 0 ? $it->price_per_liter : $it->harga_per_m2;
+                        $calc_total_penawaran += ($c * $p);
+                    }
+                } else {
+                    $calc_total_penawaran = $invoice->total_penawaran > 0 ? $invoice->total_penawaran : 0;
+                }
+                $calc_grand_total = ($calc_total_penawaran + $invoice->total_tambahan) - $invoice->diskon;
+                $calc_sisa = $calc_grand_total - $invoice->total_dp;
+            @endphp
+
             {{-- SUMMARY & NOTES SECTION --}}
             <div class="flex justify-between gap-4 text-[10px] font-sans my-1.5">
                 <div class="w-7/12 space-y-0.5 pr-2">
@@ -332,7 +381,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                     </div>
 
                     <div>
-                        <span class="font-bold">Terbilang :</span> {{ terbilang_rupiah_clean($invoice->grand_total) }}
+                        <span class="font-bold">Terbilang :</span> {{ terbilang_rupiah_clean($calc_grand_total) }}
                     </div>
 
                     <div class="text-[9px] text-black pt-0.5">
@@ -343,7 +392,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                 <div class="w-5/12 text-right space-y-0.5 font-medium min-w-[240px]">
                     <div class="flex justify-between items-center whitespace-nowrap">
                         <span class="font-bold">TOTAL</span>
-                        <span class="font-medium ml-4">: IDR {{ number_format($invoice->total_penawaran + $invoice->total_tambahan, 0, ',', '.') }}</span>
+                        <span class="font-medium ml-4">: IDR {{ number_format($calc_total_penawaran + $invoice->total_tambahan, 0, ',', '.') }}</span>
                     </div>
 
                     <div class="flex justify-between items-center whitespace-nowrap">
@@ -360,7 +409,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
 
                     <div class="flex justify-between items-center whitespace-nowrap text-[11px] font-bold">
                         <span class="font-extrabold">GRAND TOTAL</span>
-                        <span class="font-extrabold ml-4">: IDR {{ number_format($invoice->grand_total, 0, ',', '.') }}</span>
+                        <span class="font-extrabold ml-4">: IDR {{ number_format($calc_grand_total, 0, ',', '.') }}</span>
                     </div>
 
                     @if($invoice->payments && $invoice->payments->count() > 0)
@@ -372,7 +421,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                         @endforeach
                         <div class="flex justify-between items-center whitespace-nowrap text-[11px] font-bold text-blue-900">
                             <span class="font-extrabold">SISA PEMBAYARAN</span>
-                            <span class="font-extrabold ml-4">: IDR {{ number_format($invoice->sisa_pembayaran, 0, ',', '.') }}</span>
+                            <span class="font-extrabold ml-4">: IDR {{ number_format($calc_sisa, 0, ',', '.') }}</span>
                         </div>
                     @endif
                 </div>
@@ -472,13 +521,32 @@ if (!function_exists('terbilang_rupiah_clean')) {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @php $rowCounter = 1; @endphp
+                        @php
+                            $rowCounter = 1;
+                            $parseNum = function($str) {
+                                if (!$str) return 0;
+                                $str = str_replace(',', '.', (string)$str);
+                                preg_match('/([0-9]+(\.[0-9]+)?)/', $str, $m);
+                                return isset($m[1]) ? (float)$m[1] : 0;
+                            };
+                        @endphp
                         @if(!empty($invoice->tampilkan_comp_b) && $invoice->offer && $invoice->offer->items->isNotEmpty())
                             @foreach($invoice->offer->items as $item)
                                 @php
                                     $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
                                     $packing = $item->packing_size ?? '';
-                                    $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
+                                    $prod = $item->product ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
+                                    $compB = $item->comp_b ?? $prod?->comp_b;
+                                    $packingB = $prod?->packing_size_b ?? $item->packing_size_b ?? '';
+
+                                    $numTotal = $parseNum($packing);
+                                    $numB = $parseNum($packingB);
+                                    $numA = max(0, $numTotal - $numB);
+                                    $unit = 'L';
+                                    if ($packing && preg_match('/[a-zA-Z]+/', $packing, $uMatch)) {
+                                        $unit = $uMatch[0];
+                                    }
+                                    $packingA = ($numA > 0) ? (rtrim(rtrim(number_format($numA, 2, '.', ''), '0'), '.') . ' ' . $unit) : $packing;
 
                                     $namaCompA = $item->nama_produk;
                                     if ($compB && !str_contains(strtoupper($namaCompA), 'CPA')) {
@@ -496,7 +564,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                         <td class="py-0.5 px-2">
                                             <div class="flex justify-between items-center font-bold">
                                                 <span>{{ strtoupper($namaCompA) }}</span>
-                                                <span class="font-normal text-[9px] pr-4">{{ $packing }}</span>
+                                                <span class="font-normal text-[9px] pr-4">{{ $packingA }}</span>
                                             </div>
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
@@ -508,7 +576,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                         <td class="py-0.5 px-2">
                                             <div class="flex justify-between items-center font-bold">
                                                 <span>{{ strtoupper($namaCompB) }}</span>
-                                                <span class="font-normal text-[9px] pr-4">{{ $packing }}</span>
+                                                <span class="font-normal text-[9px] pr-4">{{ $packingB }}</span>
                                             </div>
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
@@ -523,6 +591,9 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                                 <span>{{ strtoupper($item->nama_produk) }}</span>
                                                 <span class="font-normal text-[9px] pr-4">{{ $packing }}</span>
                                             </div>
+                                            @if(!empty($item->keterangan))
+                                                <div class="text-[9px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
+                                            @endif
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                         <td class="py-0.5 px-2 text-center"></td>
@@ -543,6 +614,9 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                             <span>{{ strtoupper($item->nama_produk) }}</span>
                                             <span class="font-normal text-[9px] pr-4">{{ $packing }}</span>
                                         </div>
+                                        @if(!empty($item->keterangan))
+                                            <div class="text-[9px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
+                                        @endif
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                     <td class="py-0.5 px-2 text-center"></td>

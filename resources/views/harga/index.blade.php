@@ -156,6 +156,9 @@
                             @if($product->comp_b)
                                 <div class="text-[11px] font-normal text-purple-700 bg-purple-50 inline-block px-1.5 py-0.5 rounded border border-purple-200 mt-1">
                                     Comp B: {{ $product->comp_b }}
+                                    @if($product->packing_size_b)
+                                        <span class="font-semibold text-purple-900">({{ $product->packing_size_b }})</span>
+                                    @endif
                                 </div>
                             @endif
                         </th>
@@ -208,6 +211,11 @@
                                 </span>
                             @else
                                 <span class="text-gray-400 text-xs italic">-</span>
+                            @endif
+                            @if($product->comp_b && $product->packing_size_b)
+                                <div class="text-[10px] text-purple-700 font-semibold mt-1">
+                                    Comp B: {{ $product->packing_size_b }}
+                                </div>
                             @endif
                         </td>
 

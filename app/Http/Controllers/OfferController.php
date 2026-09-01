@@ -103,6 +103,7 @@ class OfferController extends Controller
 
                     $pricePerLiter = (float)($itemData['price_per_liter'] ?? 0);
                     $basePrice = (float)($itemData['base_price_per_liter'] ?? 0);
+                    $upPercent = isset($itemData['up_percent']) ? (float)$itemData['up_percent'] : 40;
                     $consumption = (float)($itemData['consumption_l'] ?? 0);
                     $qtyOrder = (float)($itemData['qty_order'] ?? 0);
 
@@ -112,12 +113,15 @@ class OfferController extends Controller
                         'product_id'           => $itemData['product_id'] ?? $prod?->id,
                         'nama_produk'          => $itemData['nama_produk'],
                         'comp_b'               => $prod?->comp_b,
+                        'packing_size_b'       => $prod?->packing_size_b,
                         'packing_size'         => $itemData['packing_size'] ?? '',
                         'qty_order'            => $qtyOrder,
                         'consumption_l'        => $consumption,
                         'status_produk'        => $status,
                         'price_per_liter'      => $pricePerLiter,
                         'base_price_per_liter' => $basePrice,
+                        'up_percent'           => $upPercent,
+                        'keterangan'           => $itemData['keterangan'] ?? null,
                         'harga_per_m2'         => $pricePerLiter,
                         'volume'               => $consumption,
                     ]);
@@ -184,6 +188,7 @@ class OfferController extends Controller
 
                     $pricePerLiter = (float)($itemData['price_per_liter'] ?? 0);
                     $basePrice = (float)($itemData['base_price_per_liter'] ?? 0);
+                    $upPercent = isset($itemData['up_percent']) ? (float)$itemData['up_percent'] : 40;
                     $consumption = (float)($itemData['consumption_l'] ?? 0);
                     $qtyOrder = (float)($itemData['qty_order'] ?? 0);
 
@@ -193,12 +198,15 @@ class OfferController extends Controller
                         'product_id'           => $itemData['product_id'] ?? $prod?->id,
                         'nama_produk'          => $itemData['nama_produk'],
                         'comp_b'               => $prod?->comp_b,
+                        'packing_size_b'       => $prod?->packing_size_b,
                         'packing_size'         => $itemData['packing_size'] ?? '',
                         'qty_order'            => $qtyOrder,
                         'consumption_l'        => $consumption,
                         'status_produk'        => $status,
                         'price_per_liter'      => $pricePerLiter,
                         'base_price_per_liter' => $basePrice,
+                        'up_percent'           => $upPercent,
+                        'keterangan'           => $itemData['keterangan'] ?? null,
                         'harga_per_m2'         => $pricePerLiter,
                         'volume'               => $consumption,
                     ]);
@@ -263,6 +271,7 @@ class OfferController extends Controller
                             'product_id'   => $prod?->id,
                             'nama_produk'  => $pData['nama'],
                             'comp_b'       => $prod?->comp_b,
+                            'packing_size_b' => $prod?->packing_size_b,
                             'area_dinding' => $pData['area'] ?? '',
                             'volume'       => (float)($pData['volume'] ?? 0),
                             'harga_per_m2' => (float)($pData['harga'] ?? 0),

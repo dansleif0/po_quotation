@@ -136,6 +136,13 @@ class InvoiceController extends Controller
             }
         }
 
+        // 4. Update keterangan pada masing-masing produk penawaran
+        if ($request->has('item_keterangan') && is_array($request->item_keterangan)) {
+            foreach ($request->item_keterangan as $itemId => $ket) {
+                \App\Models\OfferItem::where('id', $itemId)->update(['keterangan' => $ket]);
+            }
+        }
+
         // Alihkan ke halaman histori invoice dengan pesan sukses
         return redirect()->route('invoice.histori')->with('success', 'Invoice baru berhasil dibuat!');
     }

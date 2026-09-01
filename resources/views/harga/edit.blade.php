@@ -30,11 +30,19 @@
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 text-sm" required>
                 </div>
 
-                {{-- Comp B (Span 2 / Optional) --}}
-                <div class="md:col-span-2">
+                {{-- Comp B (Optional) --}}
+                <div>
                     <label for="comp_b" class="block text-sm font-semibold text-gray-700">Comp B <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
                     <input type="text" name="comp_b" id="comp_b" value="{{ old('comp_b', $product->comp_b) }}"
                            placeholder="Contoh: Hardener Comp B / Standard Comp B (opsional)"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 text-sm">
+                </div>
+
+                {{-- Packing Size Comp B (Optional) --}}
+                <div>
+                    <label for="packing_size_b" class="block text-sm font-semibold text-gray-700">Packing Size Comp B <span class="text-xs text-gray-500 font-normal">(Optional)</span></label>
+                    <input type="text" name="packing_size_b" id="packing_size_b" value="{{ old('packing_size_b', $product->packing_size_b) }}"
+                           placeholder="Contoh: 5 L, 2.5 L, 0.5 L"
                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 text-sm">
                 </div>
 

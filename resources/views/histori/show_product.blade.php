@@ -148,6 +148,8 @@
 
                             $compB_price = round($priceL * 0.09);
                             $compA_price = $priceL - $compB_price;
+                            $prod = $item->product ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
+                            $packingB = $prod?->packing_size_b ?? $item->packing_size_b ?? $item->packing_size;
                         @endphp
                         {{-- Row 1: Main Product (Comp A) --}}
                         <tr>
@@ -168,7 +170,7 @@
                             <td class="font-bold uppercase border border-black py-1.5 px-2 align-middle text-gray-800">
                                 <div>{{ $compB }}</div>
                             </td>
-                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $item->packing_size ?: '-' }}</td>
+                            <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $packingB ?: '-' }}</td>
                             <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $qty + 0 }}</td>
                             <td class="text-center border border-black py-1.5 px-1 align-middle">{{ $consumption + 0 }}</td>
                             <td class="text-center uppercase border border-black py-1.5 px-1 align-middle">{{ $item->status_produk ?: 'READY' }}</td>

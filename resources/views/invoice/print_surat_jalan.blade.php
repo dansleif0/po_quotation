@@ -138,13 +138,32 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @php $rowCounter = 1; @endphp
+                    @php
+                        $rowCounter = 1;
+                        $parseNum = function($str) {
+                            if (!$str) return 0;
+                            $str = str_replace(',', '.', (string)$str);
+                            preg_match('/([0-9]+(\.[0-9]+)?)/', $str, $m);
+                            return isset($m[1]) ? (float)$m[1] : 0;
+                        };
+                    @endphp
                     @if(!empty($invoice->tampilkan_comp_b) && $invoice->offer && $invoice->offer->items->isNotEmpty())
                         @foreach($invoice->offer->items as $item)
                             @php
                                 $qty = $item->qty_order > 0 ? $item->qty_order : ($item->volume > 0 ? $item->volume : 1);
                                 $packing = $item->packing_size ?? '';
-                                $compB = $item->comp_b ?? $item->product?->comp_b ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first()?->comp_b;
+                                $prod = $item->product ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
+                                $compB = $item->comp_b ?? $prod?->comp_b;
+                                $packingB = $prod?->packing_size_b ?? $item->packing_size_b ?? '';
+
+                                $numTotal = $parseNum($packing);
+                                $numB = $parseNum($packingB);
+                                $numA = max(0, $numTotal - $numB);
+                                $unit = 'L';
+                                if ($packing && preg_match('/[a-zA-Z]+/', $packing, $uMatch)) {
+                                    $unit = $uMatch[0];
+                                }
+                                $packingA = ($numA > 0) ? (rtrim(rtrim(number_format($numA, 2, '.', ''), '0'), '.') . ' ' . $unit) : $packing;
 
                                 $namaCompA = $item->nama_produk;
                                 if ($compB && !str_contains(strtoupper($namaCompA), 'CPA')) {
@@ -163,7 +182,7 @@
                                     <td class="py-0.5 px-2">
                                         <div class="flex justify-between items-center font-bold">
                                             <span>{{ strtoupper($namaCompA) }}</span>
-                                            <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
+                                            <span class="font-normal text-[10px] pr-4">{{ $packingA }}</span>
                                         </div>
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
@@ -176,7 +195,7 @@
                                     <td class="py-0.5 px-2">
                                         <div class="flex justify-between items-center font-bold">
                                             <span>{{ strtoupper($namaCompB) }}</span>
-                                            <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
+                                            <span class="font-normal text-[10px] pr-4">{{ $packingB }}</span>
                                         </div>
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
@@ -191,6 +210,9 @@
                                             <span>{{ strtoupper($item->nama_produk) }}</span>
                                             <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
                                         </div>
+                                        @if(!empty($item->keterangan))
+                                            <div class="text-[10px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
+                                        @endif
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                     <td class="py-0.5 px-2 text-center"></td>
@@ -211,6 +233,9 @@
                                         <span>{{ strtoupper($item->nama_produk) }}</span>
                                         <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
                                     </div>
+                                    @if(!empty($item->keterangan))
+                                        <div class="text-[10px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
+                                    @endif
                                 </td>
                                 <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                 <td class="py-0.5 px-2 text-center"></td>
