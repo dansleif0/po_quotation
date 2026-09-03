@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Penawaran.App</title>
+    <title>Login - BeingNautic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -15,8 +15,11 @@
     <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-100">
 
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-                PEN<span class="text-blue-600">AWARAN</span>.APP
+            <div class="flex justify-center mb-4">
+                <img src="{{ asset('images/beingnautic.png') }}" alt="BeingNautic Logo" class="h-16 w-auto object-contain">
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                Being<span class="text-blue-600">Nautic</span>
             </h1>
             <p class="text-gray-500 text-sm mt-2">Silakan masuk menggunakan username Anda</p>
         </div>

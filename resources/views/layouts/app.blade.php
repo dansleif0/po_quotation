@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Penawaran</title>
+    <title>Dashboard BeingNautic</title>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -79,7 +79,7 @@
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
                     {{-- Kontainer Logo Tanpa Background Putih --}}
                     <div class="flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110">
-                        <img src="{{ asset('images/logo-app.png') }}"
+                        <img src="{{ asset('images/beingnautic.png') }}"
                             alt="Logo"
                             class="h-11 w-auto object-contain drop-shadow-md">
                     </div>
@@ -87,7 +87,7 @@
                     {{-- Teks Brand --}}
                     <div class="flex flex-col">
                         <span class="text-lg font-extrabold tracking-wider text-white leading-none">
-                            PENAWARAN<span class="text-blue-400">.APP</span>
+                            Being<span class="text-blue-400">Nautic</span>
                         </span>
                         <span class="text-[10px] text-slate-400 font-medium tracking-[0.2em] uppercase mt-1">
                             Management System

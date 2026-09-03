@@ -1,7 +1,7 @@
 <header class="bg-white border-b border-gray-200 sticky top-0 z-10 print:hidden">
     <nav class="container mx-auto px-4 flex justify-between items-center py-3">
         <div class="flex items-center gap-8">
-            <a href="{{ url('/') }}" class="font-bold text-lg tracking-wider">PENAWARAN.APP</a>
+            <a href="{{ url('/') }}" class="font-bold text-lg tracking-wider">BeingNautic</a>
             <ul class="hidden lg:flex items-center gap-6">
                 <li><a href="{{ url('/') }}" class="text-xs uppercase font-medium text-gray-500 hover:text-black">Dashboard</a></li>
                 <li><a href="{{ route('histori.index') }}" class="text-xs uppercase font-medium text-gray-500 hover:text-black">Histori Penawaran</a></li>

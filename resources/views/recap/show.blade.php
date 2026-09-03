@@ -134,7 +134,7 @@
             <div class="px-10 py-8 bg-slate-900 text-slate-500 border-t border-slate-800">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <p class="text-[9px] font-bold uppercase tracking-widest text-center md:text-left">
-                        DIHASILKAN SECARA OTOMATIS OLEH <span class="text-white">PENAWARAN.APP</span> PADA {{ now()->format('d/m/Y H:i') }}
+                        DIHASILKAN SECARA OTOMATIS OLEH <span class="text-white">BeingNautic</span> PADA {{ now()->format('d/m/Y H:i') }}
                     </p>
                     <p class="text-[9px] font-bold italic">Sistem Manajemen Inventori & Profit V2.0</p>
                 </div>
