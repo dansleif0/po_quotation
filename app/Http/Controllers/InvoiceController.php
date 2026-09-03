@@ -109,6 +109,7 @@ class InvoiceController extends Controller
             'grand_total' => $grand_total,
             'total_dp' => $total_dp,
             'sisa_pembayaran' => $sisa_pembayaran,
+            'catatan_tambahan' => $request->catatan_tambahan,
             'tampilkan_comp_b' => $request->has('tampilkan_comp_b') ? 1 : 0,
         ]);
 
@@ -225,6 +226,7 @@ class InvoiceController extends Controller
             'grand_total' => $grand_total,
             'total_dp' => $total_dp,
             'sisa_pembayaran' => $sisa_pembayaran,
+            'catatan_tambahan' => $request->catatan_tambahan,
             'tampilkan_comp_b' => $request->has('tampilkan_comp_b') ? 1 : 0,
         ]);
 

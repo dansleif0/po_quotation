@@ -161,6 +161,13 @@
                     @endif
                 </div>
 
+                {{-- Form Catatan Tambahan --}}
+                <div class="mt-4">
+                    <label for="catatan_tambahan" class="block text-sm font-semibold text-gray-800 mb-1 flex items-center gap-2">Catatan Tambahan Invoice (Opsional)</label>
+                    <p class="text-xs text-gray-600 mb-2">Catatan ini akan tampil di bagian bawah Invoice jika diisi.</p>
+                    <textarea name="catatan_tambahan" id="catatan_tambahan" rows="3" class="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2" placeholder="Masukkan catatan tambahan jika ada...">{{ old('catatan_tambahan', $invoice->catatan_tambahan) }}</textarea>
+                </div>
+
                 <!-- Pekerjaan Tambahan -->
                 <div class="mt-6">
                     <label class="block text-sm font-medium text-gray-700">Pekerjaan Tambahan (optional)</label>

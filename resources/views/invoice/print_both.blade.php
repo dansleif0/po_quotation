@@ -174,7 +174,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                         </div>
                         <div class="flex items-center">
                             <span class="w-16 font-bold shrink-0">Sales</span>
-                            <span class="font-bold">: YASRI</span>
+                            <span class="font-bold">: </span>
                         </div>
                     </div>
                 </div>
@@ -213,7 +213,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                     $consumption = $item->consumption_l > 0 ? $item->consumption_l : ($item->volume > 0 ? $item->volume : 1);
                                     $priceL = $item->price_per_liter > 0 ? $item->price_per_liter : $item->harga_per_m2;
                                     $rowTotal = $consumption * $priceL;
-                                    
+
                                     $prod = $item->product ?? \App\Models\Product::where('nama_produk', $item->nama_produk)->first();
                                     $compB = $item->comp_b ?? $prod?->comp_b;
                                     $packingB = $prod?->packing_size_b ?? $item->packing_size_b ?? '';
@@ -285,9 +285,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                                 <span>{{ strtoupper($item->nama_produk) }}</span>
                                                 <span class="font-normal text-[9px] pr-2">{{ $packing }}</span>
                                             </div>
-                                            @if(!empty($item->keterangan))
-                                                <div class="text-[9px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
-                                            @endif
+
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                         <td class="py-0.5 px-2 text-center"></td>
@@ -316,9 +314,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                             <span>{{ strtoupper($item->nama_produk) }}</span>
                                             <span class="font-normal text-[9px] pr-2">{{ $packing }}</span>
                                         </div>
-                                        @if(!empty($item->keterangan))
-                                            <div class="text-[9px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
-                                        @endif
+
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                     <td class="py-0.5 px-2 text-center"></td>
@@ -386,6 +382,24 @@ if (!function_exists('terbilang_rupiah_clean')) {
 
                     <div>
                         <span class="font-bold">Catatan :</span> {{ strtoupper($invoice->nama_klien) }} {{ $invoice->offer && $invoice->offer->client_details ? '- ' . strtoupper($invoice->offer->client_details) : '' }}
+                        @php
+                            $no_po = '';
+                            if ($invoice->offer) {
+                                if ($invoice->offer->project_no) {
+                                    $no_po = $invoice->offer->project_no;
+                                }
+                                $po = \App\Models\PurchaseOrder::where('offer_id', $invoice->offer->id)->first();
+                                if ($po && $po->po_number) {
+                                    $no_po = $po->po_number;
+                                }
+                            }
+                        @endphp
+                        @if($no_po)
+                        <br><span class="inline-block w-[58px]"></span>NO PO : {{ $no_po }}
+                        @endif
+                        @if($invoice->catatan_tambahan)
+                        <br><span class="inline-block w-[58px]"></span>{{ $invoice->catatan_tambahan }}
+                        @endif
                     </div>
 
                     <div>
@@ -510,7 +524,7 @@ if (!function_exists('terbilang_rupiah_clean')) {
                         </div>
                         <div class="flex items-center">
                             <span class="w-16 font-bold shrink-0">Sales</span>
-                            <span class="font-bold">: YASRI</span>
+                            <span class="font-bold">: </span>
                         </div>
                     </div>
                 </div>
@@ -577,7 +591,11 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                         <td class="py-0.5 px-2 text-center"></td>
-                                        <td class="py-0.5 px-2 text-center"></td>
+                                        <td class="py-0.5 px-2 text-center">
+                                            @if(!empty($item->keterangan))
+                                                <span class="text-[9px] font-normal text-gray-700">{{ $item->keterangan }}</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                     <tr class="align-top">
                                         <td class="py-0.5 px-1 text-center font-semibold">{{ $rowCounter++ }}.</td>
@@ -599,13 +617,14 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                                 <span>{{ strtoupper($item->nama_produk) }}</span>
                                                 <span class="font-normal text-[9px] pr-4">{{ $packing }}</span>
                                             </div>
-                                            @if(!empty($item->keterangan))
-                                                <div class="text-[9px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
-                                            @endif
                                         </td>
                                         <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                         <td class="py-0.5 px-2 text-center"></td>
-                                        <td class="py-0.5 px-2 text-center"></td>
+                                        <td class="py-0.5 px-2 text-center">
+                                            @if(!empty($item->keterangan))
+                                                <span class="text-[9px] font-normal text-gray-700">{{ $item->keterangan }}</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endif
                             @endforeach
@@ -622,13 +641,14 @@ if (!function_exists('terbilang_rupiah_clean')) {
                                             <span>{{ strtoupper($item->nama_produk) }}</span>
                                             <span class="font-normal text-[9px] pr-4">{{ $packing }}</span>
                                         </div>
-                                        @if(!empty($item->keterangan))
-                                            <div class="text-[9px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
-                                        @endif
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                     <td class="py-0.5 px-2 text-center"></td>
-                                    <td class="py-0.5 px-2 text-center"></td>
+                                    <td class="py-0.5 px-2 text-center">
+                                        @if(!empty($item->keterangan))
+                                            <span class="text-[9px] font-normal text-gray-700">{{ $item->keterangan }}</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         @else
@@ -659,6 +679,24 @@ if (!function_exists('terbilang_rupiah_clean')) {
             <div class="my-1.5 text-[10px] font-sans space-y-0.5">
                 <div>
                     <span class="font-bold">Catatan :</span> {{ strtoupper($invoice->nama_klien) }} {{ $invoice->offer && $invoice->offer->client_details ? '- ' . strtoupper($invoice->offer->client_details) : '' }}
+                    @php
+                        $no_po = '';
+                        if ($invoice->offer) {
+                            if ($invoice->offer->project_no) {
+                                $no_po = $invoice->offer->project_no;
+                            }
+                            $po = \App\Models\PurchaseOrder::where('offer_id', $invoice->offer->id)->first();
+                            if ($po && $po->po_number) {
+                                $no_po = $po->po_number;
+                            }
+                        }
+                    @endphp
+                    @if($no_po)
+                    <br><span class="inline-block w-[58px]"></span>NO PO : {{ $no_po }}
+                    @endif
+                    @if($invoice->catatan_tambahan)
+                    <br><span class="inline-block w-[58px]"></span>{{ $invoice->catatan_tambahan }}
+                    @endif
                 </div>
                 <div class="text-[9px] text-black pt-0.5">
                     <span class="font-bold">Printed By :</span> Admin, {{ date('H:i:s, l, d F Y') }}

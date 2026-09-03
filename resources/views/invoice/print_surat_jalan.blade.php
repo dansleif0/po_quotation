@@ -127,7 +127,7 @@
                     </div>
                     <div class="flex items-center">
                         <span class="w-16 font-bold shrink-0">Sales</span>
-                        <span class="font-bold">: YASRI</span>
+                        <span class="font-bold">: </span>
                     </div>
                 </div>
             </div>
@@ -195,7 +195,11 @@
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                     <td class="py-0.5 px-2 text-center"></td>
-                                    <td class="py-0.5 px-2 text-center"></td>
+                                    <td class="py-0.5 px-2 text-center">
+                                        @if(!empty($item->keterangan))
+                                            <span class="text-[9px] font-normal text-gray-700">{{ $item->keterangan }}</span>
+                                        @endif
+                                    </td>
                                 </tr>
                                 {{-- Row 2: Comp B --}}
                                 <tr class="align-top">
@@ -218,13 +222,14 @@
                                             <span>{{ strtoupper($item->nama_produk) }}</span>
                                             <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
                                         </div>
-                                        @if(!empty($item->keterangan))
-                                            <div class="text-[10px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
-                                        @endif
                                     </td>
                                     <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                     <td class="py-0.5 px-2 text-center"></td>
-                                    <td class="py-0.5 px-2 text-center"></td>
+                                    <td class="py-0.5 px-2 text-center">
+                                        @if(!empty($item->keterangan))
+                                            <span class="text-[9px] font-normal text-gray-700">{{ $item->keterangan }}</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endif
                         @endforeach
@@ -241,13 +246,14 @@
                                         <span>{{ strtoupper($item->nama_produk) }}</span>
                                         <span class="font-normal text-[10px] pr-4">{{ $packing }}</span>
                                     </div>
-                                    @if(!empty($item->keterangan))
-                                        <div class="text-[10px] font-normal text-gray-500 italic mt-0.5">Ket: {{ $item->keterangan }}</div>
-                                    @endif
                                 </td>
                                 <td class="py-0.5 px-2 text-center font-semibold">{{ number_format($qty, 0) }} CAN</td>
                                 <td class="py-0.5 px-2 text-center"></td>
-                                <td class="py-0.5 px-2 text-center"></td>
+                                <td class="py-0.5 px-2 text-center">
+                                    @if(!empty($item->keterangan))
+                                        <span class="text-[9px] font-normal text-gray-700">{{ $item->keterangan }}</span>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     @else
@@ -278,6 +284,24 @@
         <div class="my-1.5 text-[10px] font-sans space-y-0.5">
             <div>
                 <span class="font-bold">Catatan :</span> {{ strtoupper($invoice->nama_klien) }} {{ $invoice->offer && $invoice->offer->client_details ? '- ' . strtoupper($invoice->offer->client_details) : '' }}
+                @php
+                    $no_po = '';
+                    if ($invoice->offer) {
+                        if ($invoice->offer->project_no) {
+                            $no_po = $invoice->offer->project_no;
+                        }
+                        $po = \App\Models\PurchaseOrder::where('offer_id', $invoice->offer->id)->first();
+                        if ($po && $po->po_number) {
+                            $no_po = $po->po_number;
+                        }
+                    }
+                @endphp
+                @if($no_po)
+                <br><span class="inline-block w-[58px]"></span>NO PO : {{ $no_po }}
+                @endif
+                @if($invoice->catatan_tambahan)
+                <br><span class="inline-block w-[58px]"></span>{{ $invoice->catatan_tambahan }}
+                @endif
             </div>
             <div class="text-[10px] text-black pt-0.5">
                 <span class="font-bold">Printed By :</span> Admin, {{ date('H:i:s, l, d F Y') }}

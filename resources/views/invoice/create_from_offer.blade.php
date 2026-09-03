@@ -161,6 +161,13 @@
                         class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 border border-gray-300 rounded-md bg-white p-1 cursor-pointer">
                 </div>
 
+                {{-- Form Catatan Tambahan --}}
+                <div class="mt-4">
+                    <label for="catatan_tambahan" class="block text-sm font-semibold text-gray-800 mb-1 flex items-center gap-2">Catatan Tambahan Invoice (Opsional)</label>
+                    <p class="text-xs text-gray-600 mb-2">Catatan ini akan tampil di bagian bawah Invoice jika diisi.</p>
+                    <textarea name="catatan_tambahan" id="catatan_tambahan" rows="3" class="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2" placeholder="Masukkan catatan tambahan jika ada..."></textarea>
+                </div>
+
                 <!-- Pekerjaan Tambahan -->
                 <div class="mt-6">
                     <label class="block text-sm font-medium text-gray-700">Pekerjaan Tambahan (optional)</label>

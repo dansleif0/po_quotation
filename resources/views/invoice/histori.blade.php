@@ -123,7 +123,7 @@
                             <td class="px-6 py-4 text-center">
                             {{-- Tambahkan 'relative' di td agar posisi absolute dropdown benar --}}
                             <div x-data="{ open: false }" class="relative inline-block text-left">
-                                <button @click="open = !open" @click.away="open = false" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-3 py-1.5 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+                                <button type="button" @click="open = !open" @click.away="open = false" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-3 py-1.5 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
                                     Options
                                     <svg class="-mr-1 ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -161,7 +161,7 @@
                                         @endif
 
                                         {{-- Add Payment --}}
-                                        <button type="button" onclick="openPaymentModal({{ $invoice->id }}, {{ $invoice->grand_total }}, {{ $invoice->paid_amount }}, '{{ $invoice->no_invoice }}', {{ json_encode($invoice->paymentTransactions->map(fn($t) => ['amount' => $t->amount, 'date' => $t->created_at->format('d M Y'), 'receipt' => $t->payment_receipt ? Storage::url($t->payment_receipt) : null])) }})" class="w-full text-left group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700" role="menuitem">
+                                        <button type="button" onclick='openPaymentModal({{ $invoice->id }}, {{ $invoice->grand_total ?? 0 }}, {{ $invoice->paid_amount ?? 0 }}, "{{ $invoice->no_invoice }}", {{ json_encode($invoice->paymentTransactions->map(fn($t) => ["amount" => $t->amount, "date" => $t->created_at->format("d M Y"), "receipt" => $t->payment_receipt ? asset("storage/" . $t->payment_receipt) : null])) }})' class="w-full text-left group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700" role="menuitem">
                                             <span class="mr-3 text-lg">💰</span>
                                             Add Payment
                                         </button>
@@ -333,7 +333,7 @@
         }
 
         // Set action form URL
-        document.getElementById('paymentForm').action = `/${invoiceId}/payment`;
+        document.getElementById('paymentForm').action = `/invoice/${invoiceId}/payment`;
         
         document.getElementById('paymentModal').classList.remove('hidden');
     }

@@ -90,7 +90,7 @@
                                         </a>
 
                                         {{-- Add Payment --}}
-                                        <button type="button" onclick="openPaymentModal({{ $soa->id }}, {{ $totalTagihan }}, {{ $soa->paid_amount }}, '{{ $soa->no_soa }}', {{ json_encode($soa->paymentTransactions->map(fn($t) => ['amount' => $t->amount, 'date' => $t->created_at->format('d M Y'), 'receipt' => $t->payment_receipt ? Storage::url($t->payment_receipt) : null])) }})" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                                        <button type="button" onclick='openPaymentModal({{ $soa->id }}, {{ $totalTagihan ?? 0 }}, {{ $soa->paid_amount ?? 0 }}, "{{ $soa->no_soa }}", {{ json_encode($soa->paymentTransactions->map(fn($t) => ["amount" => $t->amount, "date" => $t->created_at->format("d M Y"), "receipt" => $t->payment_receipt ? asset("storage/" . $t->payment_receipt) : null])) }})' class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
                                             💰 Add Payment
                                         </button>
 
